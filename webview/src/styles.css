@@ -22,7 +22,8 @@
 }
 
 html,
-body {
+body,
+#root {
   margin: 0;
   padding: 0;
   background: var(--bg);
@@ -42,8 +43,15 @@ select {
   font: inherit;
 }
 
-#app {
-  height: 100vh;
+.layout-shell {
+  height: 100%;
+}
+
+.app-banner {
+  padding: 6px 10px;
+  color: #842029;
+  background: #f8d7da;
+  border-bottom: 1px solid #f1aeb5;
 }
 
 .layout {
@@ -79,6 +87,8 @@ select {
   min-height: 0;
   flex: 1;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .tree,
@@ -119,11 +129,6 @@ select {
 .file-row.selected,
 .commit-row.selected {
   background: var(--selected);
-}
-
-.tree-row.selected,
-.file-row.selected,
-.commit-row.selected {
   box-shadow: inset 2px 0 0 var(--selected-strong);
 }
 
@@ -278,6 +283,11 @@ select {
 
 .secondary {
   color: var(--muted);
+}
+
+.file-tree {
+  flex: 1;
+  overflow: auto;
 }
 
 .file-status {

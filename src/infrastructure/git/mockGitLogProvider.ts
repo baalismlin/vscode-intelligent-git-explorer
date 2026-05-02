@@ -1,191 +1,156 @@
-export interface GitRefNode {
-  id: string;
-  label: string;
-  type: "head" | "group" | "localBranch" | "remote" | "remoteBranch" | "tag";
-  children?: GitRefNode[];
-}
+import { GitLogProvider } from "../../domain/gitLogProvider";
+import { CommitItem, FilterState, GitRefNode } from "../../domain/gitLogModels";
 
-export interface ChangedFileNode {
-  id: string;
-  name: string;
-  path: string;
-  type: "file" | "folder";
-  status?: "M" | "A" | "D" | "R";
-  children?: ChangedFileNode[];
-}
-
-export interface CommitItem {
-  id: string;
-  shortHash: string;
-  message: string;
-  author: string;
-  date: string;
-  branchId: string;
-  graphColor?: string;
-  graphLane?: number;
-  graphShape?: "straight" | "mergeLeft" | "mergeRight";
-  changedFiles: ChangedFileNode[];
-}
-
-const changedFilesMain1: ChangedFileNode[] = [
+const changedFilesMain1 = [
   {
     id: "cf-main-1-root",
     name: "project-name",
     path: "project-name",
-    type: "folder",
+    type: "folder" as const,
     children: [
-      { id: "cf-main-1-readme", name: "README.md", path: "project-name/README.md", type: "file", status: "M" },
+      { id: "cf-main-1-readme", name: "README.md", path: "project-name/README.md", type: "file" as const, status: "M" as const },
       {
         id: "cf-main-1-src",
         name: "src",
         path: "project-name/src",
-        type: "folder",
+        type: "folder" as const,
         children: [
-          { id: "cf-main-1-index", name: "index.ts", path: "project-name/src/index.ts", type: "file", status: "M" },
-          { id: "cf-main-1-service", name: "gitService.ts", path: "project-name/src/gitService.ts", type: "file", status: "A" }
+          { id: "cf-main-1-index", name: "index.ts", path: "project-name/src/index.ts", type: "file" as const, status: "M" as const },
+          { id: "cf-main-1-service", name: "gitService.ts", path: "project-name/src/gitService.ts", type: "file" as const, status: "A" as const }
         ]
       }
     ]
   }
 ];
 
-const changedFilesMain2: ChangedFileNode[] = [
+const changedFilesMain2 = [
   {
     id: "cf-main-2-root",
     name: "project-name",
     path: "project-name",
-    type: "folder",
+    type: "folder" as const,
     children: [
       {
         id: "cf-main-2-src",
         name: "src",
         path: "project-name/src",
-        type: "folder",
+        type: "folder" as const,
         children: [
-          { id: "cf-main-2-panel", name: "gitLogPanel.ts", path: "project-name/src/gitLogPanel.ts", type: "file", status: "M" },
-          { id: "cf-main-2-ext", name: "extension.ts", path: "project-name/src/extension.ts", type: "file", status: "M" }
+          { id: "cf-main-2-panel", name: "gitLogPanel.ts", path: "project-name/src/gitLogPanel.ts", type: "file" as const, status: "M" as const },
+          { id: "cf-main-2-ext", name: "extension.ts", path: "project-name/src/extension.ts", type: "file" as const, status: "M" as const }
         ]
       },
-      { id: "cf-main-2-pkg", name: "package.json", path: "project-name/package.json", type: "file", status: "M" }
+      { id: "cf-main-2-pkg", name: "package.json", path: "project-name/package.json", type: "file" as const, status: "M" as const }
     ]
   }
 ];
 
-const changedFilesMain3: ChangedFileNode[] = [
+const changedFilesMain3 = [
   {
     id: "cf-main-3-root",
     name: "project-name",
     path: "project-name",
-    type: "folder",
+    type: "folder" as const,
     children: [
       {
         id: "cf-main-3-media",
         name: "media",
         path: "project-name/media",
-        type: "folder",
+        type: "folder" as const,
         children: [
-          { id: "cf-main-3-css", name: "gitLog.css", path: "project-name/media/gitLog.css", type: "file", status: "A" },
-          { id: "cf-main-3-js", name: "gitLog.js", path: "project-name/media/gitLog.js", type: "file", status: "A" }
+          { id: "cf-main-3-css", name: "gitLogWebview.css", path: "project-name/media/webview/gitLogWebview.css", type: "file" as const, status: "A" as const },
+          { id: "cf-main-3-js", name: "gitLogWebview.js", path: "project-name/media/webview/gitLogWebview.js", type: "file" as const, status: "A" as const }
         ]
       },
-      { id: "cf-main-3-tsconfig", name: "tsconfig.json", path: "project-name/tsconfig.json", type: "file", status: "A" }
+      { id: "cf-main-3-vite", name: "vite.webview.config.ts", path: "project-name/vite.webview.config.ts", type: "file" as const, status: "A" as const }
     ]
   }
 ];
 
-const changedFilesFeature1: ChangedFileNode[] = [
+const changedFilesFeature1 = [
   {
     id: "cf-feature-1-root",
     name: "project-name",
     path: "project-name",
-    type: "folder",
+    type: "folder" as const,
     children: [
       {
-        id: "cf-feature-1-src",
-        name: "src",
-        path: "project-name/src",
-        type: "folder",
+        id: "cf-feature-1-webview",
+        name: "webview",
+        path: "project-name/webview",
+        type: "folder" as const,
         children: [
-          { id: "cf-feature-1-webview", name: "webviewState.ts", path: "project-name/src/webviewState.ts", type: "file", status: "A" },
-          { id: "cf-feature-1-panel", name: "gitLogPanel.ts", path: "project-name/src/gitLogPanel.ts", type: "file", status: "M" }
+          { id: "cf-feature-1-main", name: "main.tsx", path: "project-name/webview/src/main.tsx", type: "file" as const, status: "A" as const },
+          { id: "cf-feature-1-store", name: "gitLogStore.ts", path: "project-name/webview/src/store/gitLogStore.ts", type: "file" as const, status: "A" as const }
         ]
       }
     ]
   }
 ];
 
-const changedFilesFeature2: ChangedFileNode[] = [
+const changedFilesFeature2 = [
   {
     id: "cf-feature-2-root",
     name: "project-name",
     path: "project-name",
-    type: "folder",
+    type: "folder" as const,
     children: [
       {
         id: "cf-feature-2-src",
         name: "src",
         path: "project-name/src",
-        type: "folder",
+        type: "folder" as const,
         children: [
-          { id: "cf-feature-2-mock", name: "mockData.ts", path: "project-name/src/mockData.ts", type: "file", status: "M" }
-        ]
-      },
-      {
-        id: "cf-feature-2-docs",
-        name: "docs",
-        path: "project-name/docs",
-        type: "folder",
-        children: [
-          { id: "cf-feature-2-spec", name: "git-log-mvp.md", path: "project-name/docs/git-log-mvp.md", type: "file", status: "A" }
+          { id: "cf-feature-2-domain", name: "gitLogProtocol.ts", path: "project-name/src/domain/gitLogProtocol.ts", type: "file" as const, status: "A" as const },
+          { id: "cf-feature-2-service", name: "gitLogApplicationService.ts", path: "project-name/src/application/gitLogApplicationService.ts", type: "file" as const, status: "A" as const }
         ]
       }
     ]
   }
 ];
 
-const changedFilesRemote1: ChangedFileNode[] = [
+const changedFilesRemote1 = [
   {
     id: "cf-remote-1-root",
     name: "project-name",
     path: "project-name",
-    type: "folder",
+    type: "folder" as const,
     children: [
       {
         id: "cf-remote-1-src",
         name: "src",
         path: "project-name/src",
-        type: "folder",
+        type: "folder" as const,
         children: [
-          { id: "cf-remote-1-history", name: "historyStore.ts", path: "project-name/src/historyStore.ts", type: "file", status: "R" },
-          { id: "cf-remote-1-index", name: "index.ts", path: "project-name/src/index.ts", type: "file", status: "M" }
+          { id: "cf-remote-1-router", name: "webviewMessageRouter.ts", path: "project-name/src/extension/bridge/webviewMessageRouter.ts", type: "file" as const, status: "A" as const },
+          { id: "cf-remote-1-panel", name: "gitLogPanel.ts", path: "project-name/src/extension/panel/gitLogPanel.ts", type: "file" as const, status: "A" as const }
         ]
       }
     ]
   }
 ];
 
-const changedFilesTag1: ChangedFileNode[] = [
+const changedFilesTag1 = [
   {
     id: "cf-tag-1-root",
     name: "project-name",
     path: "project-name",
-    type: "folder",
+    type: "folder" as const,
     children: [
-      { id: "cf-tag-1-license", name: "LICENSE", path: "project-name/LICENSE", type: "file", status: "A" },
       {
-        id: "cf-tag-1-src",
-        name: "src",
-        path: "project-name/src",
-        type: "folder",
+        id: "cf-tag-1-webview",
+        name: "webview",
+        path: "project-name/webview",
+        type: "folder" as const,
         children: [
-          { id: "cf-tag-1-legacy", name: "legacyGit.ts", path: "project-name/src/legacyGit.ts", type: "file", status: "D" }
+          { id: "cf-tag-1-app", name: "App.tsx", path: "project-name/webview/src/app/App.tsx", type: "file" as const, status: "A" as const }
         ]
       }
     ]
   }
 ];
 
-export const branches: GitRefNode[] = [
+const refs: GitRefNode[] = [
   {
     id: "head-main",
     label: "HEAD",
@@ -230,7 +195,7 @@ export const branches: GitRefNode[] = [
   }
 ];
 
-export const commitsByBranch: Record<string, CommitItem[]> = {
+const commitsByRef: Record<string, CommitItem[]> = {
   main: [
     {
       id: "c-main-1",
@@ -259,7 +224,7 @@ export const commitsByBranch: Record<string, CommitItem[]> = {
     {
       id: "c-main-3",
       shortHash: "ce11ab0",
-      message: "Add initial stylesheet and toolbar shell",
+      message: "Add initial React webview scaffold and bridge layer",
       author: "Noah",
       date: "2026-04-25 18:03",
       branchId: "main",
@@ -285,7 +250,7 @@ export const commitsByBranch: Record<string, CommitItem[]> = {
     {
       id: "c-feature-2",
       shortHash: "48a2e1d",
-      message: "Expand mock data for changed file trees",
+      message: "Add typed protocol and application service shell",
       author: "Mina",
       date: "2026-04-26 10:36",
       branchId: "feature-ui",
@@ -393,16 +358,25 @@ export const commitsByBranch: Record<string, CommitItem[]> = {
   ]
 };
 
-export interface GitLogWebviewState {
-  branches: GitRefNode[];
-  commitsByBranch: Record<string, CommitItem[]>;
-  initialBranchId: string;
-}
+export class MockGitLogProvider implements GitLogProvider {
+  public async getRefs(): Promise<GitRefNode[]> {
+    return refs;
+  }
 
-export function createInitialState(): GitLogWebviewState {
-  return {
-    branches,
-    commitsByBranch,
-    initialBranchId: "main"
-  };
+  public async getCommits(refId: string, filters: FilterState): Promise<CommitItem[]> {
+    const commits = commitsByRef[refId] ?? [];
+    const query = filters.searchText.trim().toLowerCase();
+
+    if (!query) {
+      return commits;
+    }
+
+    return commits.filter((commit) => {
+      return (
+        commit.message.toLowerCase().includes(query) ||
+        commit.shortHash.toLowerCase().includes(query) ||
+        commit.author.toLowerCase().includes(query)
+      );
+    });
+  }
 }
