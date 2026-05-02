@@ -1,0 +1,36 @@
+{
+  "name": "vscode-intellij-git-explorer",
+  "displayName": "IntelliJ Git Log",
+  "description": "MVP VS Code extension that recreates the IntelliJ IDEA Git Log window with mock data.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:intellijGitLog.open"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "intellijGitLog.open",
+        "title": "Open IntelliJ Git Log"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.11",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.6.3"
+  }
+}
