@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "node:path";
 import { GitLogApplicationService, PersistedGitLogState } from "#application/gitLogApplicationService";
-import { MockGitLogProvider } from "#infrastructure/git/mockGitLogProvider";
+import { RealGitLogProvider } from "#infrastructure/git/realGitLogProvider";
 import { WebviewMessageRouter } from "#extension/bridge/webviewMessageRouter";
 import { outputLogger } from "#extension/logging/outputLogger";
 
@@ -35,20 +35,27 @@ export class GitLogPanel {
   }
 
   private readonly panel: vscode.WebviewPanel;
-  private readonly router: WebviewMessageRouter;
+  private readonly router?: WebviewMessageRouter;
   private readonly disposables: vscode.Disposable[] = [];
   private readonly context: vscode.ExtensionContext;
-  private readonly persistenceKey: string;
+  private persistenceKey: string = "";
 
   private constructor(panel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
     this.panel = panel;
     this.context = context;
 
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? context.extensionUri.fsPath;
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceFolder) {
+      const message = "Open a workspace folder to load Git history.";
+      outputLogger.error(message);
+      this.panel.webview.html = this.getErrorHtml(message);
+      return;
+    }
+
     outputLogger.info(`Using workspace root: ${workspaceFolder}`);
     this.persistenceKey = getPersistenceKey(workspaceFolder);
     const persistedState = context.workspaceState.get<PersistedGitLogState>(this.persistenceKey);
-    const service = new GitLogApplicationService(new MockGitLogProvider(), workspaceFolder, persistedState);
+    const service = new GitLogApplicationService(new RealGitLogProvider(workspaceFolder), workspaceFolder, persistedState);
     this.router = new WebviewMessageRouter(panel, service, () => this.persistState(service.getPersistedState()));
 
     this.panel.onDidChangeViewState(
@@ -71,7 +78,7 @@ export class GitLogPanel {
   public dispose(): void {
     GitLogPanel.currentPanel = undefined;
     outputLogger.info("Disposing Git Log panel.");
-    this.router.dispose();
+    this.router?.dispose();
 
     while (this.disposables.length > 0) {
       this.disposables.pop()?.dispose();

@@ -1,5 +1,6 @@
 import {
   FilterState,
+  GitRefNode,
   GitCommitSummary,
   SelectionState
 } from "@intellij-git-log/contracts/gitLogModels";
@@ -48,6 +49,7 @@ export class GitLogApplicationService {
 
   public async getBootstrapState(): Promise<GitLogBootstrapViewModel> {
     const refs = await this.provider.getRefs();
+    this.selection = this.normalizeSelectedRef(refs, this.selection);
     const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
     this.selection = this.normalizeSelection(
       summaries,
@@ -167,4 +169,39 @@ export class GitLogApplicationService {
       selectedCommitId: nextCommitId
     };
   }
+
+  private normalizeSelectedRef(refs: GitRefNode[], selection: SelectionState): SelectionState {
+    const selectableRefIds = collectSelectableRefIds(refs);
+    if (selectableRefIds.length === 0) {
+      return {
+        selectedRefId: "",
+        selectedCommitId: ""
+      };
+    }
+
+    if (selectableRefIds.includes(selection.selectedRefId)) {
+      return selection;
+    }
+
+    return {
+      selectedRefId: selectableRefIds[0],
+      selectedCommitId: ""
+    };
+  }
+}
+
+function collectSelectableRefIds(nodes: GitRefNode[]): string[] {
+  const result: string[] = [];
+
+  for (const node of nodes) {
+    if (node.type === "localBranch" || node.type === "remoteBranch" || node.type === "tag") {
+      result.push(node.id);
+    }
+
+    if (node.children?.length) {
+      result.push(...collectSelectableRefIds(node.children));
+    }
+  }
+
+  return result;
 }

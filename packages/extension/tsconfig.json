@@ -13,6 +13,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "moduleResolution": "NodeNext",
+    "types": ["node", "vscode"],
     "baseUrl": ".",
     "paths": {
       "#application/*": ["src/application/*"],

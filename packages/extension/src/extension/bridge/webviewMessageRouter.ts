@@ -43,6 +43,10 @@ export class WebviewMessageRouter {
           outputLogger.error(`Failed to handle message ${result.data.type}: ${message}`);
           await this.postMessage({
             type: "loadingStateChanged",
+            payload: { area: "refs", isLoading: false }
+          });
+          await this.postMessage({
+            type: "loadingStateChanged",
             payload: { area: "commits", isLoading: false }
           });
           await this.postMessage({
@@ -51,7 +55,7 @@ export class WebviewMessageRouter {
           });
           await this.postMessage({
             type: "errorOccurred",
-            payload: { message: "Failed to process the requested action." }
+            payload: { message }
           });
         }
       })
@@ -79,10 +83,12 @@ export class WebviewMessageRouter {
       }
       case "ready": {
         outputLogger.info("Handling webview ready event.");
-        const bootstrap = await this.service.getBootstrapState();
-        await this.postMessage({
-          type: "bootstrap",
-          payload: bootstrap
+        await this.withLoading(["refs", "commits", "details"], async () => {
+          const bootstrap = await this.service.getBootstrapState();
+          await this.postMessage({
+            type: "bootstrap",
+            payload: bootstrap
+          });
         });
         return;
       }
