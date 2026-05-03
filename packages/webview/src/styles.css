@@ -45,6 +45,8 @@ select {
 
 .layout-shell {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-banner {
@@ -56,7 +58,8 @@ select {
 
 .layout {
   display: grid;
-  height: 100%;
+  min-height: 0;
+  flex: 1;
 }
 
 .pane-shell {
@@ -87,6 +90,9 @@ select {
   position: relative;
   cursor: col-resize;
   background: linear-gradient(to bottom, rgba(216, 221, 230, 0), rgba(216, 221, 230, 0.9), rgba(216, 221, 230, 0));
+  touch-action: none;
+  user-select: none;
+  min-width: 8px;
 }
 
 .resize-handle::before {
@@ -94,7 +100,7 @@ select {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 2px;
+  left: 3px;
   width: 1px;
   background: rgba(198, 204, 215, 0.9);
 }

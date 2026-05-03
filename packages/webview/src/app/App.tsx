@@ -60,9 +60,9 @@ export function App(): JSX.Element {
     <div className="layout-shell">
       {errorMessage ? <div className="app-banner">{errorMessage}</div> : null}
       <ResizableSplitLayout
-        leftWidth={panelLayout.refsWidth}
-        rightWidth={panelLayout.detailsWidth}
-        onResize={(layout) => setPanelLayout(layout)}
+        refsWidth={panelLayout.refsWidth}
+        detailsWidth={panelLayout.detailsWidth}
+        onResize={setPanelLayout}
         left={
           <div
             className={`pane-shell ${focusedPane === "refs" ? "focused-pane" : ""}`.trim()}
