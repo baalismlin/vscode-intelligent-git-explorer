@@ -148,6 +148,14 @@ export class GitLogApplicationService {
     };
   }
 
+  public resetPersistedState(): void {
+    this.selection = {
+      selectedRefId: "main",
+      selectedCommitId: ""
+    };
+    this.filters = defaultFilters;
+  }
+
   private normalizeSelection(
     commits: GitCommitSummary[],
     selectedRefId: string,

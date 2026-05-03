@@ -28,7 +28,7 @@ export class RealGitLogProvider implements GitLogProvider {
     const currentHead = await this.getCurrentHeadRef();
     const refOutput = await this.runGit([
       "for-each-ref",
-      "--format=%(refname)" + fieldSeparator + "%(refname:short)",
+      `--format=%(refname)${fieldSeparator}%(refname:short)`,
       "refs/heads",
       "refs/remotes",
       "refs/tags"
@@ -54,7 +54,7 @@ export class RealGitLogProvider implements GitLogProvider {
       }
 
       if (fullRefName.startsWith("refs/remotes/")) {
-        if (shortRefName.endsWith("/HEAD")) {
+        if (fullRefName.endsWith("/HEAD")) {
           continue;
         }
 

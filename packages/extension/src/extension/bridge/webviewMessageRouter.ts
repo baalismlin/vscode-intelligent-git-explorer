@@ -16,12 +16,19 @@ export class WebviewMessageRouter {
   private readonly panel: vscode.WebviewPanel;
   private readonly service: GitLogApplicationService;
   private readonly onStateChanged?: () => void;
+  private readonly onStateCleared?: () => PromiseLike<void> | void;
   private readonly disposables: vscode.Disposable[] = [];
 
-  public constructor(panel: vscode.WebviewPanel, service: GitLogApplicationService, onStateChanged?: () => void) {
+  public constructor(
+    panel: vscode.WebviewPanel,
+    service: GitLogApplicationService,
+    onStateChanged?: () => void,
+    onStateCleared?: () => PromiseLike<void> | void
+  ) {
     this.panel = panel;
     this.service = service;
     this.onStateChanged = onStateChanged;
+    this.onStateCleared = onStateCleared;
 
     this.disposables.push(
       this.panel.webview.onDidReceiveMessage(async (rawMessage) => {
@@ -40,6 +47,14 @@ export class WebviewMessageRouter {
           await this.handleMessage(result.data);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
+          if (result.data.type === "ready" && isInvalidPersistedStateError(message)) {
+            outputLogger.warn(`Clearing persisted state after bootstrap failure: ${message}`);
+            this.service.resetPersistedState();
+            await this.onStateCleared?.();
+            await this.handleMessage(result.data);
+            return;
+          }
+
           outputLogger.error(`Failed to handle message ${result.data.type}: ${message}`);
           await this.postMessage({
             type: "loadingStateChanged",
@@ -211,4 +226,8 @@ function safeJson(value: unknown): string {
   } catch {
     return "[unserializable]";
   }
+}
+
+function isInvalidPersistedStateError(message: string): boolean {
+  return message.includes("The selected Git reference is no longer available.");
 }

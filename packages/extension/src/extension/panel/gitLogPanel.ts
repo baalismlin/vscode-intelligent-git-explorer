@@ -56,7 +56,12 @@ export class GitLogPanel {
     this.persistenceKey = getPersistenceKey(workspaceFolder);
     const persistedState = context.workspaceState.get<PersistedGitLogState>(this.persistenceKey);
     const service = new GitLogApplicationService(new RealGitLogProvider(workspaceFolder), workspaceFolder, persistedState);
-    this.router = new WebviewMessageRouter(panel, service, () => this.persistState(service.getPersistedState()));
+    this.router = new WebviewMessageRouter(
+      panel,
+      service,
+      () => this.persistState(service.getPersistedState()),
+      () => this.clearPersistedState()
+    );
 
     this.panel.onDidChangeViewState(
       (event) => {
@@ -167,6 +172,10 @@ export class GitLogPanel {
 
   private persistState(state: PersistedGitLogState): void {
     void this.context.workspaceState.update(this.persistenceKey, state);
+  }
+
+  private clearPersistedState(): Thenable<void> {
+    return this.context.workspaceState.update(this.persistenceKey, undefined);
   }
 
   private getErrorHtml(reason: string): string {
