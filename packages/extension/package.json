@@ -4,10 +4,10 @@
   "private": true,
   "type": "commonjs",
   "imports": {
-    "#application/*": "./dist/application/*",
-    "#domain/*": "./dist/domain/*",
-    "#extension/*": "./dist/extension/*",
-    "#infrastructure/*": "./dist/infrastructure/*"
+    "#application/*": "./dist/application/*.js",
+    "#domain/*": "./dist/domain/*.js",
+    "#extension/*": "./dist/extension/*.js",
+    "#infrastructure/*": "./dist/infrastructure/*.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json"
