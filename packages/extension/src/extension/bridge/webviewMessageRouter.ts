@@ -9,8 +9,8 @@ import {
   ExtensionToWebviewMessage,
   webviewToExtensionMessageSchema
 } from "@intellij-git-log/contracts/gitLogProtocol";
-import { GitLogApplicationService } from "../../application/gitLogApplicationService";
-import { outputLogger } from "../logging/outputLogger";
+import { GitLogApplicationService } from "#application/gitLogApplicationService";
+import { outputLogger } from "#extension/logging/outputLogger";
 
 export class WebviewMessageRouter {
   private readonly panel: vscode.WebviewPanel;

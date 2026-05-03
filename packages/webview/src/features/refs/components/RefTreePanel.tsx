@@ -1,8 +1,8 @@
 import { GitRefNode } from "@intellij-git-log/contracts/gitLogModels";
-import { isSelectableRef } from "../../../app/navigation";
-import { postMessageToHost } from "../../../bridge/vscode";
-import { Panel } from "../../../shared/components/Panel";
-import { useGitLogStore } from "../../../store/gitLogStore";
+import { isSelectableRef } from "@app/navigation";
+import { postMessageToHost } from "@bridge/vscode";
+import { Panel } from "@shared/components/Panel";
+import { useGitLogStore } from "@store/gitLogStore";
 
 export function RefTreePanel(): JSX.Element {
   const refs = useGitLogStore((state) => state.refs);

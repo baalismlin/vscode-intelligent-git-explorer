@@ -1,4 +1,4 @@
-import { useGitLogStore } from "../../../store/gitLogStore";
+import { useGitLogStore } from "@store/gitLogStore";
 
 export function CommitDetailsCard(): JSX.Element {
   const selectedCommitDetail = useGitLogStore((state) => state.selectedCommitDetail);

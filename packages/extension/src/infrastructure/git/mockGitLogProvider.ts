@@ -5,7 +5,7 @@ import {
   GitCommitSummary,
   GitRefNode
 } from "@intellij-git-log/contracts/gitLogModels";
-import { GitLogProvider } from "../../domain/gitLogProvider";
+import { GitLogProvider } from "#domain/gitLogProvider";
 
 const changedFilesMain1 = [
   {

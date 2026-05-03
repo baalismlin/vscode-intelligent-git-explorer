@@ -1,6 +1,6 @@
 import { ChangeEvent } from "react";
-import { postMessageToHost } from "../../../bridge/vscode";
-import { useGitLogStore } from "../../../store/gitLogStore";
+import { postMessageToHost } from "@bridge/vscode";
+import { useGitLogStore } from "@store/gitLogStore";
 
 export function CommitToolbar(): JSX.Element {
   const filters = useGitLogStore((state) => state.filters);

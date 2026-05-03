@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { outputLogger } from "../logging/outputLogger";
-import { GitLogPanel } from "../panel/gitLogPanel";
+import { outputLogger } from "#extension/logging/outputLogger";
+import { GitLogPanel } from "#extension/panel/gitLogPanel";
 
 export function registerOpenGitLogCommand(context: vscode.ExtensionContext): vscode.Disposable {
   return vscode.commands.registerCommand("intellijGitLog.open", () => {

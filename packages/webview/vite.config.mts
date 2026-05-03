@@ -7,6 +7,15 @@ const packageRoot = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@app": path.resolve(packageRoot, "src/app"),
+      "@bridge": path.resolve(packageRoot, "src/bridge"),
+      "@features": path.resolve(packageRoot, "src/features"),
+      "@shared": path.resolve(packageRoot, "src/shared"),
+      "@store": path.resolve(packageRoot, "src/store")
+    }
+  },
   define: {
     "process.env.NODE_ENV": JSON.stringify("production")
   },

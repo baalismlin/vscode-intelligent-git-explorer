@@ -1,6 +1,6 @@
 import { CommitListItemViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
-import { postMessageToHost } from "../../../bridge/vscode";
-import { useGitLogStore } from "../../../store/gitLogStore";
+import { postMessageToHost } from "@bridge/vscode";
+import { useGitLogStore } from "@store/gitLogStore";
 import { CommitGraphCell } from "./CommitGraphCell";
 
 export function CommitTable(): JSX.Element {

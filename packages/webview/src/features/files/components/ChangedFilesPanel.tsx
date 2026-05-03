@@ -1,5 +1,5 @@
-import { Panel } from "../../../shared/components/Panel";
-import { useGitLogStore } from "../../../store/gitLogStore";
+import { Panel } from "@shared/components/Panel";
+import { useGitLogStore } from "@store/gitLogStore";
 import { ChangedFilesTree } from "./ChangedFilesTree";
 import { CommitDetailsCard } from "./CommitDetailsCard";
 

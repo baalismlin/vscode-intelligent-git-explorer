@@ -2,7 +2,7 @@ import {
   extensionToWebviewMessageSchema,
   ExtensionToWebviewMessage
 } from "@intellij-git-log/contracts/gitLogProtocol";
-import { useGitLogStore } from "../store/gitLogStore";
+import { useGitLogStore } from "@store/gitLogStore";
 
 export function subscribeToHostMessages(): () => void {
   const handler = (event: MessageEvent<unknown>) => {

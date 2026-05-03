@@ -8,7 +8,7 @@ import {
   CommitListItemViewModel,
   GitLogBootstrapViewModel
 } from "@intellij-git-log/contracts/gitLogViewModels";
-import { GitLogProvider } from "../domain/gitLogProvider";
+import { GitLogProvider } from "#domain/gitLogProvider";
 import { GitLogViewModelMapper } from "./gitLogViewModelMapper";
 
 const defaultFilters: FilterState = {

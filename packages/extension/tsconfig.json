@@ -13,6 +13,13 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "moduleResolution": "NodeNext",
+    "baseUrl": ".",
+    "paths": {
+      "#application/*": ["src/application/*"],
+      "#domain/*": ["src/domain/*"],
+      "#extension/*": ["src/extension/*"],
+      "#infrastructure/*": ["src/infrastructure/*"]
+    },
     "skipLibCheck": true
   },
   "include": [

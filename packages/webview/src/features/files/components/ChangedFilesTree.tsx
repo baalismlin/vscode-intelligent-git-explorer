@@ -1,5 +1,5 @@
 import { ChangedFileNodeViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
-import { useGitLogStore } from "../../../store/gitLogStore";
+import { useGitLogStore } from "@store/gitLogStore";
 
 export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewModel; depth: number }): JSX.Element {
   const selectedFileId = useGitLogStore((state) => state.selectedFileId);

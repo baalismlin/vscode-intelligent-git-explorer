@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import * as path from "node:path";
-import { GitLogApplicationService, PersistedGitLogState } from "../../application/gitLogApplicationService";
-import { MockGitLogProvider } from "../../infrastructure/git/mockGitLogProvider";
-import { WebviewMessageRouter } from "../bridge/webviewMessageRouter";
-import { outputLogger } from "../logging/outputLogger";
+import { GitLogApplicationService, PersistedGitLogState } from "#application/gitLogApplicationService";
+import { MockGitLogProvider } from "#infrastructure/git/mockGitLogProvider";
+import { WebviewMessageRouter } from "#extension/bridge/webviewMessageRouter";
+import { outputLogger } from "#extension/logging/outputLogger";
 
 export class GitLogPanel {
   public static readonly viewType = "intellijGitLog.panel";
