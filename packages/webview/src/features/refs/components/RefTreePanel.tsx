@@ -1,4 +1,5 @@
 import { GitRefNode } from "@intellij-git-log/contracts/gitLogModels";
+import { isSelectableRef } from "../../../app/navigation";
 import { postMessageToHost } from "../../../bridge/vscode";
 import { Panel } from "../../../shared/components/Panel";
 import { useGitLogStore } from "../../../store/gitLogStore";
@@ -67,10 +68,6 @@ function RefTreeNode({ node, depth }: { node: GitRefNode; depth: number }): JSX.
         : null}
     </div>
   );
-}
-
-function isSelectableRef(type: GitRefNode["type"]): boolean {
-  return type === "localBranch" || type === "remoteBranch" || type === "tag";
 }
 
 function getRefIcon(type: GitRefNode["type"]): string {

@@ -3,10 +3,26 @@ import { FilterState, GitRefNode, SelectionState } from "@intellij-git-log/contr
 import { CommitDetailViewModel, CommitListItemViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
 import { BootstrapPayload } from "@intellij-git-log/contracts/gitLogProtocol";
 
+export type FocusedPane = "refs" | "commits" | "files";
+
 interface LoadingState {
   refs: boolean;
   commits: boolean;
   details: boolean;
+}
+
+interface PanelLayoutState {
+  refsWidth: number;
+  detailsWidth: number;
+}
+
+export interface PersistedWebviewState {
+  expandedRefs: string[];
+  expandedFiles: string[];
+  selectedFileId: string;
+  panelLayout: PanelLayoutState;
+  focusedPane: FocusedPane;
+  fileStateCommitId: string;
 }
 
 interface GitLogStoreState {
@@ -18,9 +34,13 @@ interface GitLogStoreState {
   expandedRefs: string[];
   expandedFiles: string[];
   selectedFileId: string;
+  panelLayout: PanelLayoutState;
+  focusedPane: FocusedPane;
   loading: LoadingState;
   errorMessage: string;
+  persistedUiState?: PersistedWebviewState;
   bootstrap: (payload: BootstrapPayload) => void;
+  restorePersistedUiState: (state: PersistedWebviewState) => void;
   setRefs: (refs: GitRefNode[]) => void;
   setCommits: (refId: string, commits: CommitListItemViewModel[]) => void;
   setCommitDetails: (commitId: string, detail: CommitDetailViewModel | null) => void;
@@ -28,9 +48,13 @@ interface GitLogStoreState {
   setFilters: (filters: FilterState) => void;
   setLoadingState: (area: keyof LoadingState, isLoading: boolean) => void;
   setErrorMessage: (message: string) => void;
+  clearErrorMessage: () => void;
   toggleRefExpanded: (refId: string) => void;
   toggleFileExpanded: (fileId: string) => void;
   selectFile: (fileId: string) => void;
+  setPanelLayout: (layout: Partial<PanelLayoutState>) => void;
+  setFocusedPane: (pane: FocusedPane) => void;
+  getPersistedUiState: () => PersistedWebviewState;
 }
 
 const defaultSelection: SelectionState = {
@@ -47,6 +71,10 @@ const defaultFilters: FilterState = {
 };
 
 const defaultExpandedRefs = ["head-main", "local-group", "remote-group", "origin", "tags-group"];
+const defaultPanelLayout: PanelLayoutState = {
+  refsWidth: 270,
+  detailsWidth: 320
+};
 
 export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
   refs: [],
@@ -57,21 +85,37 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
   expandedRefs: defaultExpandedRefs,
   expandedFiles: [],
   selectedFileId: "",
+  panelLayout: defaultPanelLayout,
+  focusedPane: "commits",
   loading: {
     refs: false,
     commits: false,
     details: false
   },
   errorMessage: "",
+  restorePersistedUiState: (state) => set({ persistedUiState: state }),
   bootstrap: (payload) => {
+    const persistedUiState = get().persistedUiState;
+    const selectedCommitDetail = payload.selectedCommitDetail;
+    const shouldReuseFileState =
+      Boolean(persistedUiState?.fileStateCommitId) &&
+      selectedCommitDetail?.commitId === persistedUiState?.fileStateCommitId;
+
     set({
       refs: payload.refs,
       commits: payload.commits,
-      selectedCommitDetail: payload.selectedCommitDetail,
+      selectedCommitDetail,
       selection: payload.selection,
       filters: payload.filters,
-      expandedFiles: payload.selectedCommitDetail?.defaultExpandedFileIds ?? [],
-      selectedFileId: payload.selectedCommitDetail?.initialSelectedFileId ?? "",
+      expandedRefs: persistedUiState?.expandedRefs ?? get().expandedRefs,
+      expandedFiles: shouldReuseFileState
+        ? persistedUiState?.expandedFiles ?? []
+        : selectedCommitDetail?.defaultExpandedFileIds ?? [],
+      selectedFileId: shouldReuseFileState
+        ? persistedUiState?.selectedFileId ?? ""
+        : selectedCommitDetail?.initialSelectedFileId ?? "",
+      panelLayout: persistedUiState?.panelLayout ?? get().panelLayout,
+      focusedPane: persistedUiState?.focusedPane ?? get().focusedPane,
       errorMessage: ""
     });
   },
@@ -85,10 +129,19 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
     });
   },
   setCommitDetails: (_commitId, detail) => {
+    const persistedUiState = get().persistedUiState;
+    const shouldReuseFileState =
+      Boolean(persistedUiState?.fileStateCommitId) &&
+      detail?.commitId === persistedUiState?.fileStateCommitId;
+
     set({
       selectedCommitDetail: detail,
-      expandedFiles: detail?.defaultExpandedFileIds ?? [],
-      selectedFileId: detail?.initialSelectedFileId ?? ""
+      expandedFiles: shouldReuseFileState
+        ? persistedUiState?.expandedFiles ?? []
+        : detail?.defaultExpandedFileIds ?? [],
+      selectedFileId: shouldReuseFileState
+        ? persistedUiState?.selectedFileId ?? ""
+        : detail?.initialSelectedFileId ?? ""
     });
   },
   setSelection: (selection) => set({ selection }),
@@ -101,6 +154,7 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
       }
     })),
   setErrorMessage: (message) => set({ errorMessage: message }),
+  clearErrorMessage: () => set({ errorMessage: "" }),
   toggleRefExpanded: (refId) =>
     set((state) => ({
       expandedRefs: toggleInArray(state.expandedRefs, refId)
@@ -109,7 +163,23 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
     set((state) => ({
       expandedFiles: toggleInArray(state.expandedFiles, fileId)
     })),
-  selectFile: (fileId) => set({ selectedFileId: fileId })
+  selectFile: (fileId) => set({ selectedFileId: fileId }),
+  setPanelLayout: (layout) =>
+    set((state) => ({
+      panelLayout: {
+        ...state.panelLayout,
+        ...layout
+      }
+    })),
+  setFocusedPane: (pane) => set({ focusedPane: pane }),
+  getPersistedUiState: () => ({
+    expandedRefs: get().expandedRefs,
+    expandedFiles: get().expandedFiles,
+    selectedFileId: get().selectedFileId,
+    panelLayout: get().panelLayout,
+    focusedPane: get().focusedPane,
+    fileStateCommitId: get().selectedCommitDetail?.commitId ?? ""
+  })
 }));
 
 function toggleInArray(items: string[], value: string): string[] {

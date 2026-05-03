@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "node:path";
-import { GitLogApplicationService } from "../../application/gitLogApplicationService";
+import { GitLogApplicationService, PersistedGitLogState } from "../../application/gitLogApplicationService";
 import { MockGitLogProvider } from "../../infrastructure/git/mockGitLogProvider";
 import { WebviewMessageRouter } from "../bridge/webviewMessageRouter";
 import { outputLogger } from "../logging/outputLogger";
@@ -37,14 +37,19 @@ export class GitLogPanel {
   private readonly panel: vscode.WebviewPanel;
   private readonly router: WebviewMessageRouter;
   private readonly disposables: vscode.Disposable[] = [];
+  private readonly context: vscode.ExtensionContext;
+  private readonly persistenceKey: string;
 
   private constructor(panel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
     this.panel = panel;
+    this.context = context;
 
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? context.extensionUri.fsPath;
     outputLogger.info(`Using workspace root: ${workspaceFolder}`);
-    const service = new GitLogApplicationService(new MockGitLogProvider(), workspaceFolder);
-    this.router = new WebviewMessageRouter(panel, service);
+    this.persistenceKey = getPersistenceKey(workspaceFolder);
+    const persistedState = context.workspaceState.get<PersistedGitLogState>(this.persistenceKey);
+    const service = new GitLogApplicationService(new MockGitLogProvider(), workspaceFolder, persistedState);
+    this.router = new WebviewMessageRouter(panel, service, () => this.persistState(service.getPersistedState()));
 
     this.panel.onDidChangeViewState(
       (event) => {
@@ -153,6 +158,10 @@ export class GitLogPanel {
 </html>`;
   }
 
+  private persistState(state: PersistedGitLogState): void {
+    void this.context.workspaceState.update(this.persistenceKey, state);
+  }
+
   private getErrorHtml(reason: string): string {
     return `<!DOCTYPE html>
 <html lang="en">
@@ -208,4 +217,8 @@ function escapeHtml(value: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+function getPersistenceKey(repositoryRoot: string): string {
+  return `intellijGitLog:${repositoryRoot}`;
 }

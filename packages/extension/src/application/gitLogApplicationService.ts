@@ -19,6 +19,11 @@ const defaultFilters: FilterState = {
   paths: ""
 };
 
+export interface PersistedGitLogState {
+  selection: SelectionState;
+  filters: FilterState;
+}
+
 export class GitLogApplicationService {
   private readonly provider: GitLogProvider;
   private readonly repositoryRoot: string;
@@ -29,10 +34,16 @@ export class GitLogApplicationService {
   };
   private filters: FilterState = defaultFilters;
 
-  public constructor(provider: GitLogProvider, repositoryRoot: string) {
+  public constructor(
+    provider: GitLogProvider,
+    repositoryRoot: string,
+    persistedState?: Partial<PersistedGitLogState>
+  ) {
     this.provider = provider;
     this.repositoryRoot = repositoryRoot;
     this.mapper = new GitLogViewModelMapper();
+    this.selection = persistedState?.selection ?? this.selection;
+    this.filters = persistedState?.filters ?? this.filters;
   }
 
   public async getBootstrapState(): Promise<GitLogBootstrapViewModel> {
@@ -125,6 +136,13 @@ export class GitLogApplicationService {
       commits: this.mapper.mapCommitListItems(summaries),
       selectedCommitDetail: this.mapper.mapCommitDetail(detail),
       selection: this.selection
+    };
+  }
+
+  public getPersistedState(): PersistedGitLogState {
+    return {
+      selection: this.selection,
+      filters: this.filters
     };
   }
 

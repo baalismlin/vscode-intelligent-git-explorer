@@ -1,4 +1,9 @@
 import * as vscode from "vscode";
+import { SelectionState } from "@intellij-git-log/contracts/gitLogModels";
+import {
+  CommitDetailViewModel,
+  CommitListItemViewModel
+} from "@intellij-git-log/contracts/gitLogViewModels";
 import {
   extensionToWebviewMessageSchema,
   ExtensionToWebviewMessage,
@@ -10,11 +15,13 @@ import { outputLogger } from "../logging/outputLogger";
 export class WebviewMessageRouter {
   private readonly panel: vscode.WebviewPanel;
   private readonly service: GitLogApplicationService;
+  private readonly onStateChanged?: () => void;
   private readonly disposables: vscode.Disposable[] = [];
 
-  public constructor(panel: vscode.WebviewPanel, service: GitLogApplicationService) {
+  public constructor(panel: vscode.WebviewPanel, service: GitLogApplicationService, onStateChanged?: () => void) {
     this.panel = panel;
     this.service = service;
+    this.onStateChanged = onStateChanged;
 
     this.disposables.push(
       this.panel.webview.onDidReceiveMessage(async (rawMessage) => {
@@ -29,7 +36,24 @@ export class WebviewMessageRouter {
           return;
         }
 
-        await this.handleMessage(result.data);
+        try {
+          await this.handleMessage(result.data);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          outputLogger.error(`Failed to handle message ${result.data.type}: ${message}`);
+          await this.postMessage({
+            type: "loadingStateChanged",
+            payload: { area: "commits", isLoading: false }
+          });
+          await this.postMessage({
+            type: "loadingStateChanged",
+            payload: { area: "details", isLoading: false }
+          });
+          await this.postMessage({
+            type: "errorOccurred",
+            payload: { message: "Failed to process the requested action." }
+          });
+        }
       })
     );
   }
@@ -64,99 +88,107 @@ export class WebviewMessageRouter {
       }
       case "selectRef": {
         outputLogger.info(`Selecting ref: ${message.payload.refId}`);
-        await this.postMessage({
-          type: "loadingStateChanged",
-          payload: { area: "commits", isLoading: true }
-        });
-        const result = await this.service.selectRef(message.payload.refId);
-        await this.postMessage({
-          type: "selectionUpdated",
-          payload: result.selection
-        });
-        await this.postMessage({
-          type: "commitsUpdated",
-          payload: {
-            refId: result.selection.selectedRefId,
-            commits: result.commits
-          }
-        });
-        await this.postMessage({
-          type: "commitDetailsUpdated",
-          payload: {
-            commitId: result.selection.selectedCommitId,
-            detail: result.selectedCommitDetail
-          }
-        });
-        await this.postMessage({
-          type: "loadingStateChanged",
-          payload: { area: "commits", isLoading: false }
+        await this.withLoading(["commits", "details"], async () => {
+          const result = await this.service.selectRef(message.payload.refId);
+          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail);
         });
         return;
       }
       case "selectCommit": {
         outputLogger.info(`Selecting commit: ${message.payload.commitId}`);
-        const result = await this.service.selectCommit(message.payload.commitId);
-        await this.postMessage({
-          type: "selectionUpdated",
-          payload: result.selection
-        });
-        await this.postMessage({
-          type: "commitDetailsUpdated",
-          payload: {
-            commitId: result.selection.selectedCommitId,
-            detail: result.selectedCommitDetail
-          }
+        await this.withLoading(["details"], async () => {
+          const result = await this.service.selectCommit(message.payload.commitId);
+          await this.postMessage({
+            type: "selectionUpdated",
+            payload: result.selection
+          });
+          await this.postMessage({
+            type: "commitDetailsUpdated",
+            payload: {
+              commitId: result.selection.selectedCommitId,
+              detail: result.selectedCommitDetail
+            }
+          });
+          this.onStateChanged?.();
         });
         return;
       }
       case "setFilters": {
         outputLogger.info(`Updating filters: ${safeJson(message.payload)}`);
-        const result = await this.service.setFilters(message.payload);
-        await this.postMessage({
-          type: "selectionUpdated",
-          payload: result.selection
-        });
-        await this.postMessage({
-          type: "commitsUpdated",
-          payload: {
-            refId: result.selection.selectedRefId,
-            commits: result.commits
-          }
-        });
-        await this.postMessage({
-          type: "commitDetailsUpdated",
-          payload: {
-            commitId: result.selection.selectedCommitId,
-            detail: result.selectedCommitDetail
-          }
+        await this.withLoading(["commits", "details"], async () => {
+          const result = await this.service.setFilters(message.payload);
+          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail);
         });
         return;
       }
       case "refresh": {
         outputLogger.info("Refreshing commit list.");
-        const result = await this.service.refresh();
-        await this.postMessage({
-          type: "selectionUpdated",
-          payload: result.selection
-        });
-        await this.postMessage({
-          type: "commitsUpdated",
-          payload: {
-            refId: result.selection.selectedRefId,
-            commits: result.commits
-          }
-        });
-        await this.postMessage({
-          type: "commitDetailsUpdated",
-          payload: {
-            commitId: result.selection.selectedCommitId,
-            detail: result.selectedCommitDetail
-          }
+        await this.withLoading(["commits", "details"], async () => {
+          const result = await this.service.refresh();
+          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail);
         });
         return;
       }
+      case "loadMoreCommits":
+      case "openFile":
+      case "openDiff":
+      case "runCommand":
+        await this.postMessage({
+          type: "errorOccurred",
+          payload: { message: `Action ${message.type} is not implemented yet.` }
+        });
+        return;
       default:
         return;
+    }
+  }
+
+  private async postSelectionPayloads(
+    selection: SelectionState,
+    commits: CommitListItemViewModel[],
+    selectedCommitDetail: CommitDetailViewModel | null
+  ): Promise<void> {
+    await this.postMessage({
+      type: "selectionUpdated",
+      payload: selection
+    });
+    await this.postMessage({
+      type: "commitsUpdated",
+      payload: {
+        refId: selection.selectedRefId,
+        commits
+      }
+    });
+    await this.postMessage({
+      type: "commitDetailsUpdated",
+      payload: {
+        commitId: selection.selectedCommitId,
+        detail: selectedCommitDetail
+      }
+    });
+    this.onStateChanged?.();
+  }
+
+  private async withLoading(
+    areas: Array<"refs" | "commits" | "details">,
+    action: () => Promise<void>
+  ): Promise<void> {
+    for (const area of areas) {
+      await this.postMessage({
+        type: "loadingStateChanged",
+        payload: { area, isLoading: true }
+      });
+    }
+
+    try {
+      await action();
+    } finally {
+      for (const area of areas) {
+        await this.postMessage({
+          type: "loadingStateChanged",
+          payload: { area, isLoading: false }
+        });
+      }
     }
   }
 

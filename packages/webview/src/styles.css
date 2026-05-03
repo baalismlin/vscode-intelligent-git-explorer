@@ -56,12 +56,23 @@ select {
 
 .layout {
   display: grid;
-  grid-template-columns: 270px minmax(540px, 1fr) 320px;
   height: 100%;
+}
+
+.pane-shell {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.focused-pane .panel-title {
+  color: #315f93;
+  background: linear-gradient(to bottom, #f9fcff, #edf5ff);
 }
 
 .panel {
   min-width: 0;
+  height: 100%;
   background: var(--panel-bg);
   border-right: 1px solid var(--border);
   display: flex;
@@ -70,6 +81,28 @@ select {
 
 .panel:last-child {
   border-right: 0;
+}
+
+.resize-handle {
+  position: relative;
+  cursor: col-resize;
+  background: linear-gradient(to bottom, rgba(216, 221, 230, 0), rgba(216, 221, 230, 0.9), rgba(216, 221, 230, 0));
+}
+
+.resize-handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2px;
+  width: 1px;
+  background: rgba(198, 204, 215, 0.9);
+}
+
+.resize-handle:hover::before,
+.focused-pane + .resize-handle::before,
+.resize-handle:hover {
+  background-color: rgba(98, 152, 219, 0.15);
 }
 
 .panel-title {
@@ -130,6 +163,13 @@ select {
 .commit-row.selected {
   background: var(--selected);
   box-shadow: inset 2px 0 0 var(--selected-strong);
+}
+
+.focused-pane .tree-row.selected,
+.focused-pane .file-row.selected,
+.focused-pane .commit-row.selected {
+  background: #cfe6ff;
+  box-shadow: inset 3px 0 0 #4e91d9;
 }
 
 .indent {
