@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+  ChangedFileNodeViewModel,
+  CommitDetailViewModel,
+  CommitListItemViewModel,
+  GitLogBootstrapViewModel
+} from "../application/gitLogViewModels";
 
 const changedFileNodeSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
@@ -20,17 +26,30 @@ const gitRefNodeSchema: z.ZodType<any> = z.lazy(() =>
   })
 );
 
+const commitGraphSchema = z.object({
+  color: z.string(),
+  lane: z.number(),
+  shape: z.enum(["straight", "mergeLeft", "mergeRight"])
+});
+
 const commitItemSchema = z.object({
   id: z.string(),
   shortHash: z.string(),
   message: z.string(),
   author: z.string(),
   date: z.string(),
-  branchId: z.string(),
-  graphColor: z.string().optional(),
-  graphLane: z.number().optional(),
-  graphShape: z.enum(["straight", "mergeLeft", "mergeRight"]).optional(),
-  changedFiles: z.array(changedFileNodeSchema)
+  graph: commitGraphSchema
+});
+
+const commitDetailSchema = z.object({
+  commitId: z.string(),
+  shortHash: z.string(),
+  message: z.string(),
+  author: z.string(),
+  date: z.string(),
+  changedFiles: z.array(changedFileNodeSchema),
+  defaultExpandedFileIds: z.array(z.string()),
+  initialSelectedFileId: z.string()
 });
 
 const filterStateSchema = z.object({
@@ -52,6 +71,7 @@ export const bootstrapPayloadSchema = z.object({
   }),
   refs: z.array(gitRefNodeSchema),
   commits: z.array(commitItemSchema),
+  selectedCommitDetail: commitDetailSchema.nullable(),
   selection: selectionStateSchema,
   filters: filterStateSchema
 });
@@ -75,12 +95,12 @@ export const extensionToWebviewMessageSchema = z.discriminatedUnion("type", [
     })
   }),
   z.object({
-    type: z.literal("commitDetailsUpdated"),
-    payload: z.object({
-      commitId: z.string(),
-      commit: commitItemSchema.nullable()
-    })
-  }),
+      type: z.literal("commitDetailsUpdated"),
+      payload: z.object({
+        commitId: z.string(),
+        detail: commitDetailSchema.nullable()
+      })
+    }),
   z.object({
     type: z.literal("selectionUpdated"),
     payload: selectionStateSchema
@@ -153,6 +173,9 @@ export const webviewToExtensionMessageSchema = z.discriminatedUnion("type", [
   })
 ]);
 
-export type BootstrapPayload = z.infer<typeof bootstrapPayloadSchema>;
+export type BootstrapPayload = GitLogBootstrapViewModel;
+export type CommitListItemPayload = CommitListItemViewModel;
+export type CommitDetailPayload = CommitDetailViewModel;
+export type ChangedFileNodePayload = ChangedFileNodeViewModel;
 export type ExtensionToWebviewMessage = z.infer<typeof extensionToWebviewMessageSchema>;
 export type WebviewToExtensionMessage = z.infer<typeof webviewToExtensionMessageSchema>;

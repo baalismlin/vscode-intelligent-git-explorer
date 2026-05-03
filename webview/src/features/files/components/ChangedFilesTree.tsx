@@ -1,7 +1,7 @@
-import { ChangedFileNode } from "../../../../../src/domain/gitLogModels";
+import { ChangedFileNodeViewModel } from "../../../../../src/application/gitLogViewModels";
 import { useGitLogStore } from "../../../store/gitLogStore";
 
-export function ChangedFilesTree({ node, depth }: { node: ChangedFileNode; depth: number }): JSX.Element {
+export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewModel; depth: number }): JSX.Element {
   const selectedFileId = useGitLogStore((state) => state.selectedFileId);
   const expandedFiles = useGitLogStore((state) => state.expandedFiles);
   const toggleFileExpanded = useGitLogStore((state) => state.toggleFileExpanded);

@@ -80,12 +80,11 @@ export class WebviewMessageRouter {
             commits: result.commits
           }
         });
-        const selectedCommit = result.commits.find((commit) => commit.id === result.selection.selectedCommitId) ?? null;
         await this.postMessage({
           type: "commitDetailsUpdated",
           payload: {
             commitId: result.selection.selectedCommitId,
-            commit: selectedCommit
+            detail: result.selectedCommitDetail
           }
         });
         await this.postMessage({
@@ -96,18 +95,16 @@ export class WebviewMessageRouter {
       }
       case "selectCommit": {
         outputLogger.info(`Selecting commit: ${message.payload.commitId}`);
-        const selection = await this.service.selectCommit(message.payload.commitId);
-        const bootstrap = await this.service.getBootstrapState();
+        const result = await this.service.selectCommit(message.payload.commitId);
         await this.postMessage({
           type: "selectionUpdated",
-          payload: selection
+          payload: result.selection
         });
-        const selectedCommit = bootstrap.commits.find((commit) => commit.id === selection.selectedCommitId) ?? null;
         await this.postMessage({
           type: "commitDetailsUpdated",
           payload: {
-            commitId: selection.selectedCommitId,
-            commit: selectedCommit
+            commitId: result.selection.selectedCommitId,
+            detail: result.selectedCommitDetail
           }
         });
         return;
@@ -126,12 +123,11 @@ export class WebviewMessageRouter {
             commits: result.commits
           }
         });
-        const selectedCommit = result.commits.find((commit) => commit.id === result.selection.selectedCommitId) ?? null;
         await this.postMessage({
           type: "commitDetailsUpdated",
           payload: {
             commitId: result.selection.selectedCommitId,
-            commit: selectedCommit
+            detail: result.selectedCommitDetail
           }
         });
         return;
@@ -148,6 +144,13 @@ export class WebviewMessageRouter {
           payload: {
             refId: result.selection.selectedRefId,
             commits: result.commits
+          }
+        });
+        await this.postMessage({
+          type: "commitDetailsUpdated",
+          payload: {
+            commitId: result.selection.selectedCommitId,
+            detail: result.selectedCommitDetail
           }
         });
         return;

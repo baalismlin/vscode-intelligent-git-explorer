@@ -1,6 +1,7 @@
-import { CommitItem, FilterState, GitRefNode } from "./gitLogModels";
+import { FilterState, GitCommitDetail, GitCommitSummary, GitRefNode } from "./gitLogModels";
 
 export interface GitLogProvider {
   getRefs(): Promise<GitRefNode[]>;
-  getCommits(refId: string, filters: FilterState): Promise<CommitItem[]>;
+  getCommitSummaries(refId: string, filters: FilterState): Promise<GitCommitSummary[]>;
+  getCommitDetail(commitId: string): Promise<GitCommitDetail | null>;
 }

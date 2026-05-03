@@ -1,4 +1,4 @@
-import { CommitItem } from "../../../../../src/domain/gitLogModels";
+import { CommitListItemViewModel } from "../../../../../src/application/gitLogViewModels";
 import { postMessageToHost } from "../../../bridge/vscode";
 import { useGitLogStore } from "../../../store/gitLogStore";
 import { CommitGraphCell } from "./CommitGraphCell";
@@ -29,7 +29,7 @@ export function CommitTable(): JSX.Element {
   );
 }
 
-function CommitRow({ commit, selected }: { commit: CommitItem; selected: boolean }): JSX.Element {
+function CommitRow({ commit, selected }: { commit: CommitListItemViewModel; selected: boolean }): JSX.Element {
   return (
     <div
       className={`commit-row ${selected ? "selected" : ""}`.trim()}

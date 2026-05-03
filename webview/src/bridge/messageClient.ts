@@ -33,7 +33,7 @@ function applyHostMessage(message: ExtensionToWebviewMessage): void {
       store.setCommits(message.payload.refId, message.payload.commits);
       return;
     case "commitDetailsUpdated":
-      store.setCommitDetails(message.payload.commitId, message.payload.commit);
+      store.setCommitDetails(message.payload.commitId, message.payload.detail);
       return;
     case "selectionUpdated":
       store.setSelection(message.payload);

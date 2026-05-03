@@ -1,5 +1,7 @@
-import { BootstrapState, CommitItem, FilterState, SelectionState } from "../domain/gitLogModels";
+import { FilterState, GitCommitSummary, SelectionState } from "../domain/gitLogModels";
 import { GitLogProvider } from "../domain/gitLogProvider";
+import { GitLogViewModelMapper } from "./gitLogViewModelMapper";
+import { CommitDetailViewModel, CommitListItemViewModel, GitLogBootstrapViewModel } from "./gitLogViewModels";
 
 const defaultFilters: FilterState = {
   searchText: "",
@@ -12,6 +14,7 @@ const defaultFilters: FilterState = {
 export class GitLogApplicationService {
   private readonly provider: GitLogProvider;
   private readonly repositoryRoot: string;
+  private readonly mapper: GitLogViewModelMapper;
   private selection: SelectionState = {
     selectedRefId: "main",
     selectedCommitId: ""
@@ -21,63 +24,104 @@ export class GitLogApplicationService {
   public constructor(provider: GitLogProvider, repositoryRoot: string) {
     this.provider = provider;
     this.repositoryRoot = repositoryRoot;
+    this.mapper = new GitLogViewModelMapper();
   }
 
-  public async getBootstrapState(): Promise<BootstrapState> {
+  public async getBootstrapState(): Promise<GitLogBootstrapViewModel> {
     const refs = await this.provider.getRefs();
-    const commits = await this.provider.getCommits(this.selection.selectedRefId, this.filters);
-    this.selection = this.normalizeSelection(commits, this.selection.selectedRefId, this.selection.selectedCommitId);
+    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    this.selection = this.normalizeSelection(
+      summaries,
+      this.selection.selectedRefId,
+      this.selection.selectedCommitId
+    );
+    const detail = await this.provider.getCommitDetail(this.selection.selectedCommitId);
 
     return {
       workspace: {
         repositoryRoot: this.repositoryRoot
       },
-      refs,
-      commits,
+      refs: this.mapper.mapRefs(refs),
+      commits: this.mapper.mapCommitListItems(summaries),
+      selectedCommitDetail: this.mapper.mapCommitDetail(detail),
       selection: this.selection,
       filters: this.filters
     };
   }
 
-  public async selectRef(refId: string): Promise<{ commits: CommitItem[]; selection: SelectionState }> {
-    const commits = await this.provider.getCommits(refId, this.filters);
-    this.selection = this.normalizeSelection(commits, refId, "");
+  public async selectRef(refId: string): Promise<{
+    commits: CommitListItemViewModel[];
+    selectedCommitDetail: CommitDetailViewModel | null;
+    selection: SelectionState;
+  }> {
+    const summaries = await this.provider.getCommitSummaries(refId, this.filters);
+    this.selection = this.normalizeSelection(summaries, refId, "");
+    const detail = await this.provider.getCommitDetail(this.selection.selectedCommitId);
 
     return {
-      commits,
+      commits: this.mapper.mapCommitListItems(summaries),
+      selectedCommitDetail: this.mapper.mapCommitDetail(detail),
       selection: this.selection
     };
   }
 
-  public async selectCommit(commitId: string): Promise<SelectionState> {
-    const commits = await this.provider.getCommits(this.selection.selectedRefId, this.filters);
-    this.selection = this.normalizeSelection(commits, this.selection.selectedRefId, commitId);
-    return this.selection;
+  public async selectCommit(commitId: string): Promise<{
+    selection: SelectionState;
+    selectedCommitDetail: CommitDetailViewModel | null;
+  }> {
+    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    this.selection = this.normalizeSelection(summaries, this.selection.selectedRefId, commitId);
+    const detail = await this.provider.getCommitDetail(this.selection.selectedCommitId);
+
+    return {
+      selection: this.selection,
+      selectedCommitDetail: this.mapper.mapCommitDetail(detail)
+    };
   }
 
-  public async setFilters(filters: FilterState): Promise<{ commits: CommitItem[]; selection: SelectionState }> {
+  public async setFilters(filters: FilterState): Promise<{
+    commits: CommitListItemViewModel[];
+    selectedCommitDetail: CommitDetailViewModel | null;
+    selection: SelectionState;
+  }> {
     this.filters = filters;
-    const commits = await this.provider.getCommits(this.selection.selectedRefId, this.filters);
-    this.selection = this.normalizeSelection(commits, this.selection.selectedRefId, this.selection.selectedCommitId);
+    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    this.selection = this.normalizeSelection(
+      summaries,
+      this.selection.selectedRefId,
+      this.selection.selectedCommitId
+    );
+    const detail = await this.provider.getCommitDetail(this.selection.selectedCommitId);
 
     return {
-      commits,
+      commits: this.mapper.mapCommitListItems(summaries),
+      selectedCommitDetail: this.mapper.mapCommitDetail(detail),
       selection: this.selection
     };
   }
 
-  public async refresh(): Promise<{ commits: CommitItem[]; selection: SelectionState }> {
-    const commits = await this.provider.getCommits(this.selection.selectedRefId, this.filters);
-    this.selection = this.normalizeSelection(commits, this.selection.selectedRefId, this.selection.selectedCommitId);
+  public async refresh(): Promise<{
+    commits: CommitListItemViewModel[];
+    selectedCommitDetail: CommitDetailViewModel | null;
+    selection: SelectionState;
+  }> {
+    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    this.selection = this.normalizeSelection(
+      summaries,
+      this.selection.selectedRefId,
+      this.selection.selectedCommitId
+    );
+    const detail = await this.provider.getCommitDetail(this.selection.selectedCommitId);
 
     return {
-      commits,
+      commits: this.mapper.mapCommitListItems(summaries),
+      selectedCommitDetail: this.mapper.mapCommitDetail(detail),
       selection: this.selection
     };
   }
 
   private normalizeSelection(
-    commits: CommitItem[],
+    commits: GitCommitSummary[],
     selectedRefId: string,
     selectedCommitId: string
   ): SelectionState {

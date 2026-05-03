@@ -1,9 +1,9 @@
 import { useGitLogStore } from "../../../store/gitLogStore";
 
 export function CommitDetailsCard(): JSX.Element {
-  const selectedCommit = useGitLogStore((state) => state.selectedCommit);
+  const selectedCommitDetail = useGitLogStore((state) => state.selectedCommitDetail);
 
-  if (!selectedCommit) {
+  if (!selectedCommitDetail) {
     return (
       <div className="details">
         <div className="detail-title">Commit Details</div>
@@ -14,15 +14,15 @@ export function CommitDetailsCard(): JSX.Element {
 
   return (
     <div className="details">
-      <div className="detail-title">{selectedCommit.message}</div>
+      <div className="detail-title">{selectedCommitDetail.message}</div>
       <div className="detail-row">
-        Hash: <span className="secondary">{selectedCommit.shortHash}</span>
+        Hash: <span className="secondary">{selectedCommitDetail.shortHash}</span>
       </div>
       <div className="detail-row">
-        Author: <span className="secondary">{selectedCommit.author}</span>
+        Author: <span className="secondary">{selectedCommitDetail.author}</span>
       </div>
       <div className="detail-row">
-        Date: <span className="secondary">{selectedCommit.date}</span>
+        Date: <span className="secondary">{selectedCommitDetail.date}</span>
       </div>
     </div>
   );

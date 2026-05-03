@@ -1,5 +1,11 @@
 import { GitLogProvider } from "../../domain/gitLogProvider";
-import { CommitItem, FilterState, GitRefNode } from "../../domain/gitLogModels";
+import {
+  FilterState,
+  GitChangedFileNode,
+  GitCommitDetail,
+  GitCommitSummary,
+  GitRefNode
+} from "../../domain/gitLogModels";
 
 const changedFilesMain1 = [
   {
@@ -62,7 +68,7 @@ const changedFilesMain3 = [
           { id: "cf-main-3-js", name: "gitLogWebview.js", path: "project-name/media/webview/gitLogWebview.js", type: "file" as const, status: "A" as const }
         ]
       },
-      { id: "cf-main-3-vite", name: "vite.webview.config.ts", path: "project-name/vite.webview.config.ts", type: "file" as const, status: "A" as const }
+      { id: "cf-main-3-vite", name: "vite.webview.config.mts", path: "project-name/vite.webview.config.mts", type: "file" as const, status: "A" as const }
     ]
   }
 ];
@@ -195,7 +201,7 @@ const refs: GitRefNode[] = [
   }
 ];
 
-const commitsByRef: Record<string, CommitItem[]> = {
+const commitSummariesByRef: Record<string, GitCommitSummary[]> = {
   main: [
     {
       id: "c-main-1",
@@ -203,11 +209,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Refine webview state handling for the Git Log MVP",
       author: "Feng",
       date: "2026-04-26 10:12",
-      branchId: "main",
-      graphColor: "#2f80ed",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesMain1
+      branchId: "main"
     },
     {
       id: "c-main-2",
@@ -215,11 +217,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Align panel layout with IntelliJ log proportions",
       author: "Mina",
       date: "2026-04-26 09:47",
-      branchId: "main",
-      graphColor: "#f2994a",
-      graphLane: 1,
-      graphShape: "mergeLeft",
-      changedFiles: changedFilesMain2
+      branchId: "main"
     },
     {
       id: "c-main-3",
@@ -227,11 +225,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Add initial React webview scaffold and bridge layer",
       author: "Noah",
       date: "2026-04-25 18:03",
-      branchId: "main",
-      graphColor: "#27ae60",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesMain3
+      branchId: "main"
     }
   ],
   "feature-ui": [
@@ -241,11 +235,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Prototype branch-driven selection flow",
       author: "Feng",
       date: "2026-04-26 11:04",
-      branchId: "feature-ui",
-      graphColor: "#9b51e0",
-      graphLane: 1,
-      graphShape: "mergeRight",
-      changedFiles: changedFilesFeature1
+      branchId: "feature-ui"
     },
     {
       id: "c-feature-2",
@@ -253,11 +243,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Add typed protocol and application service shell",
       author: "Mina",
       date: "2026-04-26 10:36",
-      branchId: "feature-ui",
-      graphColor: "#eb5757",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesFeature2
+      branchId: "feature-ui"
     }
   ],
   "release-1-1": [
@@ -267,11 +253,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Prepare release branch snapshot",
       author: "Ava",
       date: "2026-04-24 16:22",
-      branchId: "release-1-1",
-      graphColor: "#2d9cdb",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesMain2
+      branchId: "release-1-1"
     }
   ],
   "origin-main": [
@@ -281,11 +263,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Sync remote history with internal explorer state",
       author: "Olivia",
       date: "2026-04-23 14:15",
-      branchId: "origin-main",
-      graphColor: "#56ccf2",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesRemote1
+      branchId: "origin-main"
     },
     {
       id: "c-remote-2",
@@ -293,11 +271,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Stabilize mock commit graph colors",
       author: "Liam",
       date: "2026-04-22 08:41",
-      branchId: "origin-main",
-      graphColor: "#6fcf97",
-      graphLane: 1,
-      graphShape: "mergeLeft",
-      changedFiles: changedFilesMain1
+      branchId: "origin-main"
     }
   ],
   "origin-feature-ui": [
@@ -307,11 +281,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Push in-progress Git Log UI experiment",
       author: "Feng",
       date: "2026-04-21 19:30",
-      branchId: "origin-feature-ui",
-      graphColor: "#bb6bd9",
-      graphLane: 1,
-      graphShape: "mergeRight",
-      changedFiles: changedFilesFeature1
+      branchId: "origin-feature-ui"
     }
   ],
   "origin-release-1-1": [
@@ -321,11 +291,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Tag release candidate assets",
       author: "Ava",
       date: "2026-04-20 12:09",
-      branchId: "origin-release-1-1",
-      graphColor: "#f2c94c",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesTag1
+      branchId: "origin-release-1-1"
     }
   ],
   "tag-v1-0-0": [
@@ -335,11 +301,7 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Version 1.0.0 baseline",
       author: "Ava",
       date: "2026-04-19 10:00",
-      branchId: "tag-v1-0-0",
-      graphColor: "#828282",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesTag1
+      branchId: "tag-v1-0-0"
     }
   ],
   "tag-v1-1-0": [
@@ -349,13 +311,24 @@ const commitsByRef: Record<string, CommitItem[]> = {
       message: "Version 1.1.0 release snapshot",
       author: "Ava",
       date: "2026-04-24 09:00",
-      branchId: "tag-v1-1-0",
-      graphColor: "#4f4f4f",
-      graphLane: 0,
-      graphShape: "straight",
-      changedFiles: changedFilesMain3
+      branchId: "tag-v1-1-0"
     }
   ]
+};
+
+const commitDetailsById: Record<string, GitCommitDetail> = {
+  "c-main-1": buildCommitDetail(commitSummariesByRef.main[0], changedFilesMain1),
+  "c-main-2": buildCommitDetail(commitSummariesByRef.main[1], changedFilesMain2),
+  "c-main-3": buildCommitDetail(commitSummariesByRef.main[2], changedFilesMain3),
+  "c-feature-1": buildCommitDetail(commitSummariesByRef["feature-ui"][0], changedFilesFeature1),
+  "c-feature-2": buildCommitDetail(commitSummariesByRef["feature-ui"][1], changedFilesFeature2),
+  "c-release-1": buildCommitDetail(commitSummariesByRef["release-1-1"][0], changedFilesMain2),
+  "c-remote-1": buildCommitDetail(commitSummariesByRef["origin-main"][0], changedFilesRemote1),
+  "c-remote-2": buildCommitDetail(commitSummariesByRef["origin-main"][1], changedFilesMain1),
+  "c-origin-feature-1": buildCommitDetail(commitSummariesByRef["origin-feature-ui"][0], changedFilesFeature1),
+  "c-origin-release-1": buildCommitDetail(commitSummariesByRef["origin-release-1-1"][0], changedFilesTag1),
+  "c-tag-1": buildCommitDetail(commitSummariesByRef["tag-v1-0-0"][0], changedFilesTag1),
+  "c-tag-2": buildCommitDetail(commitSummariesByRef["tag-v1-1-0"][0], changedFilesMain3)
 };
 
 export class MockGitLogProvider implements GitLogProvider {
@@ -363,8 +336,8 @@ export class MockGitLogProvider implements GitLogProvider {
     return refs;
   }
 
-  public async getCommits(refId: string, filters: FilterState): Promise<CommitItem[]> {
-    const commits = commitsByRef[refId] ?? [];
+  public async getCommitSummaries(refId: string, filters: FilterState): Promise<GitCommitSummary[]> {
+    const commits = commitSummariesByRef[refId] ?? [];
     const query = filters.searchText.trim().toLowerCase();
 
     if (!query) {
@@ -379,4 +352,19 @@ export class MockGitLogProvider implements GitLogProvider {
       );
     });
   }
+
+  public async getCommitDetail(commitId: string): Promise<GitCommitDetail | null> {
+    return commitDetailsById[commitId] ?? null;
+  }
+}
+
+function buildCommitDetail(summary: GitCommitSummary, changedFiles: GitChangedFileNode[]): GitCommitDetail {
+  return {
+    commitId: summary.id,
+    shortHash: summary.shortHash,
+    message: summary.message,
+    author: summary.author,
+    date: summary.date,
+    changedFiles
+  };
 }
