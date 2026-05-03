@@ -1,8 +1,6 @@
 dist
 node_modules
 *.vsix
+packages/*/dist
 
 .DS_Store
-
-media/webview/*
-!media/webview/.gitkeep

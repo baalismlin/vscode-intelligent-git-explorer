@@ -1,0 +1,43 @@
+{
+  "name": "@intellij-git-log/contracts",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./gitLogModels": {
+      "types": "./dist/types/gitLogModels.d.ts",
+      "import": "./dist/esm/gitLogModels.js",
+      "require": "./dist/cjs/gitLogModels.js"
+    },
+    "./gitLogViewModels": {
+      "types": "./dist/types/gitLogViewModels.d.ts",
+      "import": "./dist/esm/gitLogViewModels.js",
+      "require": "./dist/cjs/gitLogViewModels.js"
+    },
+    "./gitLogProtocol": {
+      "types": "./dist/types/gitLogProtocol.d.ts",
+      "import": "./dist/esm/gitLogProtocol.js",
+      "require": "./dist/cjs/gitLogProtocol.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm run build:esm && pnpm run build:cjs && pnpm run build:types",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,11 +1,12 @@
 {
   "name": "vscode-intellij-git-explorer",
   "displayName": "IntelliJ Git Log",
-  "description": "MVP VS Code extension that recreates the IntelliJ IDEA Git Log window with mock data.",
+  "description": "MVP VS Code extension that recreates the IntelliJ IDEA Git Log.",
   "version": "0.0.1",
   "publisher": "local",
   "license": "MIT",
   "private": true,
+  "packageManager": "pnpm@10.10.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -15,7 +16,7 @@
   "activationEvents": [
     "onCommand:intellijGitLog.open"
   ],
-  "main": "./dist/extension.js",
+  "main": "./packages/extension/dist/extension.js",
   "contributes": {
     "commands": [
       {
@@ -25,24 +26,13 @@
     ]
   },
   "scripts": {
-    "compile": "npm run compile:extension && npm run compile:webview",
-    "compile:extension": "tsc -p ./",
-    "compile:webview": "vite build -c vite.webview.config.mts",
-    "watch": "tsc -watch -p ./"
-  },
-  "devDependencies": {
-    "@types/node": "^20.16.11",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@types/vscode": "^1.90.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.10"
+    "build": "pnpm run build:contracts && pnpm run build:extension && pnpm run build:webview",
+    "build:contracts": "pnpm --filter @intellij-git-log/contracts build",
+    "build:extension": "pnpm --filter @intellij-git-log/extension build",
+    "build:webview": "pnpm --filter @intellij-git-log/webview build",
+    "watch": "pnpm --filter @intellij-git-log/extension build --watch"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "zod": "^3.23.8",
-    "zustand": "^5.0.0"
+    "@intellij-git-log/contracts": "workspace:*"
   }
 }
