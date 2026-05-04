@@ -9,23 +9,15 @@ export function CommitTable(): JSX.Element {
   const isLoading = useGitLogStore((state) => state.loading.commits);
 
   return (
-    <>
-      <div className="commit-header">
-        <div>Graph</div>
-        <div>Commit message</div>
-        <div>Author</div>
-        <div>Date</div>
-      </div>
-      <div className="commit-list">
-        {isLoading ? <div className="empty-state">Loading commits...</div> : null}
-        {!isLoading && commits.length === 0 ? <div className="empty-state">No commits for the selected reference.</div> : null}
-        {!isLoading
-          ? commits.map((commit) => (
-              <CommitRow key={commit.id} commit={commit} selected={selectedCommitId === commit.id} />
-            ))
-          : null}
-      </div>
-    </>
+    <div className="commit-list">
+      {isLoading ? <div className="empty-state">Loading commits...</div> : null}
+      {!isLoading && commits.length === 0 ? <div className="empty-state">No commits for the selected reference.</div> : null}
+      {!isLoading
+        ? commits.map((commit) => (
+            <CommitRow key={commit.id} commit={commit} selected={selectedCommitId === commit.id} />
+          ))
+        : null}
+    </div>
   );
 }
 

@@ -179,6 +179,21 @@ export class WebviewMessageRouter {
       case "refs:updateSelected":
         await this.reloadBootstrap();
         return;
+      case "commits:goToRef": {
+        const query = await vscode.window.showInputBox({
+          title: "Go to hash/branch/tag",
+          prompt: "Enter a branch, tag, ref, or commit text to filter the log.",
+          placeHolder: "main, origin/main, v1.0.0, a1b2c3d",
+          ignoreFocusOut: true
+        });
+        if (!query) {
+          return;
+        }
+        await this.service.navigateToRefOrHash(query);
+        await this.reloadBootstrap();
+        return;
+      }
+      case "commits:cherryPick":
       case "refs:deleteSelected":
       case "refs:compareWithCurrent":
         await this.postMessage({

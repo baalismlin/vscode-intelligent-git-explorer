@@ -77,8 +77,7 @@ export function App(): JSX.Element {
             className={`pane-shell ${focusedPane === "commits" ? "focused-pane" : ""}`.trim()}
             onMouseDown={() => setFocusedPane("commits")}
           >
-            <section className="panel">
-              <div className="panel-title">Commit Log</div>
+            <section className="panel commit-panel">
               <div className="panel-body">
                 <CommitToolbar />
                 <CommitTable />

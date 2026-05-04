@@ -152,6 +152,45 @@ export class GitLogApplicationService {
     return this.selection;
   }
 
+  public async navigateToRefOrHash(query: string): Promise<{
+    commits: CommitListItemViewModel[];
+    selectedCommitDetail: CommitDetailViewModel | null;
+    selection: SelectionState;
+    filters: FilterState;
+  }> {
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) {
+      return {
+        commits: [],
+        selectedCommitDetail: null,
+        selection: this.selection,
+        filters: this.filters
+      };
+    }
+
+    const refs = await this.provider.getRefs();
+    const matchedRefId = findMatchingRefId(refs, normalizedQuery);
+
+    if (matchedRefId) {
+      const result = await this.selectRef(matchedRefId);
+      return {
+        ...result,
+        filters: this.filters
+      };
+    }
+
+    const nextFilters: FilterState = {
+      ...this.filters,
+      searchText: normalizedQuery
+    };
+    const result = await this.setFilters(nextFilters);
+
+    return {
+      ...result,
+      filters: this.filters
+    };
+  }
+
   public resetPersistedState(): void {
     this.selection = {
       selectedRefId: "main",
@@ -216,4 +255,27 @@ function collectSelectableRefIds(nodes: GitRefNode[]): string[] {
   }
 
   return result;
+}
+
+function findMatchingRefId(nodes: GitRefNode[], query: string): string | undefined {
+  const normalizedQuery = query.toLowerCase();
+
+  for (const node of nodes) {
+    if (isSelectableRefNode(node) && (node.id.toLowerCase() === normalizedQuery || node.label.toLowerCase() === normalizedQuery)) {
+      return node.id;
+    }
+
+    if (node.children?.length) {
+      const nested = findMatchingRefId(node.children, query);
+      if (nested) {
+        return nested;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function isSelectableRefNode(node: GitRefNode): boolean {
+  return node.type === "localBranch" || node.type === "remoteBranch" || node.type === "tag";
 }
