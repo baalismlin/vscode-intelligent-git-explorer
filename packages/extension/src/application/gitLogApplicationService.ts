@@ -148,6 +148,10 @@ export class GitLogApplicationService {
     };
   }
 
+  public getSelection(): SelectionState {
+    return this.selection;
+  }
+
   public resetPersistedState(): void {
     this.selection = {
       selectedRefId: "main",

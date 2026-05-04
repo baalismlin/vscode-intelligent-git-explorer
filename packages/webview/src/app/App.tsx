@@ -62,6 +62,7 @@ export function App(): JSX.Element {
       <ResizableSplitLayout
         refsWidth={panelLayout.refsWidth}
         detailsWidth={panelLayout.detailsWidth}
+        minRefsWidth={28}
         onResize={setPanelLayout}
         left={
           <div

@@ -1,32 +1,164 @@
+import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { GitRefNode } from "@intellij-git-log/contracts/gitLogModels";
 import { isSelectableRef } from "@app/navigation";
 import { postMessageToHost } from "@bridge/vscode";
-import { Panel } from "@shared/components/Panel";
 import { useGitLogStore } from "@store/gitLogStore";
+
+const collapsedRefsWidth = 28;
+const defaultExpandedRefsWidth = 270;
 
 export function RefTreePanel(): JSX.Element {
   const refs = useGitLogStore((state) => state.refs);
+  const refsWidth = useGitLogStore((state) => state.panelLayout.refsWidth);
+  const setPanelLayout = useGitLogStore((state) => state.setPanelLayout);
+  const selectedRefId = useGitLogStore((state) => state.selection.selectedRefId);
+  const setExpandedRefs = useGitLogStore((state) => state.setExpandedRefs);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [groupByDirectory, setGroupByDirectory] = useState(true);
+  const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase());
+  const lastExpandedWidthRef = useRef(Math.max(refsWidth, defaultExpandedRefsWidth));
+  const isCollapsed = refsWidth <= collapsedRefsWidth;
+
+  if (!isCollapsed) {
+    lastExpandedWidthRef.current = Math.max(refsWidth, collapsedRefsWidth);
+  }
+
+  const visibleRefs = useMemo(() => {
+    let nextRefs = refs;
+
+    if (!groupByDirectory) {
+      nextRefs = flattenDirectoryGroups(nextRefs);
+    }
+
+    if (deferredSearchQuery) {
+      nextRefs = filterRefs(nextRefs, deferredSearchQuery);
+    }
+
+    return nextRefs;
+  }, [deferredSearchQuery, groupByDirectory, refs]);
+
+  const expandableRefIds = useMemo(() => collectExpandableRefIds(visibleRefs), [visibleRefs]);
+  const selectedRef = selectedRefId ? findRefById(refs, selectedRefId) : undefined;
+
+  if (isCollapsed) {
+    return (
+      <section className="panel reference-panel reference-panel-collapsed">
+        <div className="reference-collapsed-rail">
+          <RefToolButton
+            label="Show Git Branches"
+            icon=">"
+            onClick={() =>
+              setPanelLayout({
+                refsWidth: Math.max(lastExpandedWidthRef.current, defaultExpandedRefsWidth)
+              })
+            }
+          />
+          <div className="reference-collapsed-title">Branches</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <Panel title="References">
-      <div className="tree">
-        {refs.map((node) => (
-          <RefTreeNode key={node.id} node={node} depth={0} />
-        ))}
+    <section className="panel reference-panel">
+      <div className="reference-panel-header">
+        <input
+          className="reference-search"
+          type="search"
+          value={searchQuery}
+          placeholder="Filter references"
+          onChange={(event) => setSearchQuery(event.target.value)}
+        />
       </div>
-    </Panel>
+      <div className="reference-panel-body">
+        <div className="reference-tools">
+          <RefToolButton
+            label="Hide Git Branches"
+            icon="<"
+            onClick={() =>
+              setPanelLayout({
+                refsWidth: collapsedRefsWidth
+              })
+            }
+          />
+          <RefToolButton label="New Branch" icon="+" onClick={() => runRefCommand("refs:newBranch")} />
+          <RefToolButton label="Update Selected" icon="U" onClick={() => runRefCommand("refs:updateSelected")} />
+          <RefToolButton label="Delete" icon="D" onClick={() => runRefCommand("refs:deleteSelected")} />
+          <RefToolButton
+            label="Compare with Current"
+            icon="C"
+            onClick={() => runRefCommand("refs:compareWithCurrent")}
+          />
+          <RefToolButton label="Fetch" icon="F" onClick={() => runRefCommand("refs:fetch")} />
+          <RefToolButton
+            label="Navigate Log to selected branch HEAD"
+            icon="H"
+            disabled={!selectedRefId || !selectedRef || !isSelectableRef(selectedRef.type)}
+            onClick={() => {
+              if (!selectedRefId) {
+                return;
+              }
+
+              postMessageToHost({
+                type: "selectRef",
+                payload: {
+                  refId: selectedRefId
+                }
+              });
+            }}
+          />
+          <RefToolButton
+            label="Group by Directory"
+            icon="/"
+            active={groupByDirectory}
+            onClick={() => setGroupByDirectory((value) => !value)}
+          />
+          <RefToolButton label="Expand All" icon="E" onClick={() => setExpandedRefs(expandableRefIds)} />
+          <RefToolButton label="Collapse All" icon="X" onClick={() => setExpandedRefs([])} />
+        </div>
+        <div className="reference-tree-pane">
+          <div className="reference-tree-content">
+            <div className="tree">
+            {visibleRefs.length > 0 ? (
+              visibleRefs.map((node) => (
+                <RefTreeNode
+                  key={node.id}
+                  node={node}
+                  depth={0}
+                  forceExpanded={Boolean(deferredSearchQuery)}
+                />
+              ))
+            ) : (
+              <div className="reference-empty-state">No references match the current filter.</div>
+            )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-function RefTreeNode({ node, depth }: { node: GitRefNode; depth: number }): JSX.Element {
+function RefTreeNode({
+  node,
+  depth,
+  forceExpanded
+}: {
+  node: GitRefNode;
+  depth: number;
+  forceExpanded: boolean;
+}): JSX.Element {
   const selectedRefId = useGitLogStore((state) => state.selection.selectedRefId);
   const expandedRefs = useGitLogStore((state) => state.expandedRefs);
   const toggleRefExpanded = useGitLogStore((state) => state.toggleRefExpanded);
 
-  const hasChildren = Boolean(node.children?.length);
-  const isExpanded = expandedRefs.includes(node.id);
-  const isSelected = selectedRefId === node.id;
-  const isSelectable = isSelectableRef(node.type);
+  const hasHeadChildBranch = node.type === "head" && node.children?.length === 1;
+  const headChildRefId = hasHeadChildBranch ? node.children?.[0]?.id ?? "" : "";
+  const headBranchName = hasHeadChildBranch ? node.children?.[0]?.label ?? "" : "";
+  const hasChildren = Boolean(node.children?.length) && !hasHeadChildBranch;
+  const isExpanded = forceExpanded || expandedRefs.includes(node.id);
+  const isSelected = selectedRefId === node.id || (hasHeadChildBranch && selectedRefId === headChildRefId);
+  const isSelectable = isSelectableRef(node.type) || hasHeadChildBranch;
 
   return (
     <div className="tree-node">
@@ -40,7 +172,7 @@ function RefTreeNode({ node, depth }: { node: GitRefNode; depth: number }): JSX.
           postMessageToHost({
             type: "selectRef",
             payload: {
-              refId: node.id
+              refId: hasHeadChildBranch ? headChildRefId : node.id
             }
           });
         }}
@@ -52,22 +184,145 @@ function RefTreeNode({ node, depth }: { node: GitRefNode; depth: number }): JSX.
           className={`toggle ${hasChildren ? "" : "spacer"}`.trim()}
           onClick={(event) => {
             event.stopPropagation();
-            if (hasChildren) {
+            if (hasChildren && !forceExpanded) {
               toggleRefExpanded(node.id);
             }
           }}
         >
           {hasChildren ? (isExpanded ? "▾" : "▸") : "•"}
         </span>
-        <span className="ref-icon">{getRefIcon(node.type)}</span>
+        {depth > 0 ? <span className="ref-icon">{getRefIcon(node.type)}</span> : null}
         <span className="ref-label">{node.label}</span>
         {node.type === "head" ? <span className="ref-type">current</span> : null}
+        {hasHeadChildBranch ? <span className="ref-branch-inline">{headBranchName}</span> : null}
       </div>
       {hasChildren && isExpanded
-        ? node.children?.map((child) => <RefTreeNode key={child.id} node={child} depth={depth + 1} />)
+        ? node.children?.map((child) => (
+            <RefTreeNode key={child.id} node={child} depth={depth + 1} forceExpanded={forceExpanded} />
+          ))
         : null}
     </div>
   );
+}
+
+function RefToolButton({
+  label,
+  icon,
+  active = false,
+  disabled = false,
+  onClick
+}: {
+  label: string;
+  icon: string;
+  active?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}): JSX.Element {
+  return (
+    <button
+      type="button"
+      className={`reference-tool-button ${active ? "active" : ""}`.trim()}
+      title={label}
+      aria-label={label}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {icon}
+    </button>
+  );
+}
+
+function runRefCommand(command: string): void {
+  postMessageToHost({
+    type: "runCommand",
+    payload: {
+      command
+    }
+  });
+}
+
+function flattenDirectoryGroups(nodes: GitRefNode[]): GitRefNode[] {
+  return nodes.map((node) => flattenDirectoryGroupNode(node, "", 0)).flat();
+}
+
+function flattenDirectoryGroupNode(node: GitRefNode, prefix: string, depth: number): GitRefNode[] {
+  const nextPrefix = prefix ? `${prefix}/${node.label}` : node.label;
+
+  if (node.type === "group" && shouldFlattenGroup(node, depth)) {
+    return (node.children ?? []).flatMap((child) => flattenDirectoryGroupNode(child, nextPrefix, depth + 1));
+  }
+
+  if (!node.children?.length) {
+    return [
+      {
+        ...node,
+        label: prefix && isSelectableRef(node.type) ? `${prefix}/${node.label}` : node.label
+      }
+    ];
+  }
+
+  return [
+    {
+      ...node,
+      children: node.children.flatMap((child) => flattenDirectoryGroupNode(child, "", depth + 1))
+    }
+  ];
+}
+
+function shouldFlattenGroup(node: GitRefNode, depth: number): boolean {
+  if (node.type !== "group") {
+    return false;
+  }
+
+  return depth > 0 && node.id !== "local-group" && node.id !== "remote-group" && node.id !== "tags-group";
+}
+
+function filterRefs(nodes: GitRefNode[], query: string): GitRefNode[] {
+  return nodes.flatMap((node) => {
+    const filteredChildren = node.children ? filterRefs(node.children, query) : undefined;
+    const matches = node.label.toLowerCase().includes(query);
+
+    if (!matches && (!filteredChildren || filteredChildren.length === 0)) {
+      return [];
+    }
+
+    return [
+      {
+        ...node,
+        children: filteredChildren
+      }
+    ];
+  });
+}
+
+function collectExpandableRefIds(nodes: GitRefNode[]): string[] {
+  const ids: string[] = [];
+
+  for (const node of nodes) {
+    if (node.children?.length) {
+      ids.push(node.id);
+      ids.push(...collectExpandableRefIds(node.children));
+    }
+  }
+
+  return ids;
+}
+
+function findRefById(nodes: GitRefNode[], refId: string): GitRefNode | undefined {
+  for (const node of nodes) {
+    if (node.id === refId) {
+      return node;
+    }
+
+    if (node.children?.length) {
+      const match = findRefById(node.children, refId);
+      if (match) {
+        return match;
+      }
+    }
+  }
+
+  return undefined;
 }
 
 function getRefIcon(type: GitRefNode["type"]): string {

@@ -153,14 +153,44 @@ export class WebviewMessageRouter {
       case "loadMoreCommits":
       case "openFile":
       case "openDiff":
-      case "runCommand":
         await this.postMessage({
           type: "errorOccurred",
           payload: { message: `Action ${message.type} is not implemented yet.` }
         });
         return;
+      case "runCommand":
+        await this.handleRunCommand(message.payload.command);
+        return;
       default:
         return;
+    }
+  }
+
+  private async handleRunCommand(command: string): Promise<void> {
+    switch (command) {
+      case "refs:newBranch":
+        await vscode.commands.executeCommand("git.branch");
+        await this.reloadBootstrap();
+        return;
+      case "refs:fetch":
+        await vscode.commands.executeCommand("git.fetch");
+        await this.reloadBootstrap();
+        return;
+      case "refs:updateSelected":
+        await this.reloadBootstrap();
+        return;
+      case "refs:deleteSelected":
+      case "refs:compareWithCurrent":
+        await this.postMessage({
+          type: "errorOccurred",
+          payload: { message: `Action ${command} is not implemented yet.` }
+        });
+        return;
+      default:
+        await this.postMessage({
+          type: "errorOccurred",
+          payload: { message: `Unknown command: ${command}` }
+        });
     }
   }
 
@@ -217,6 +247,17 @@ export class WebviewMessageRouter {
     const validated = extensionToWebviewMessageSchema.parse(message);
     outputLogger.info(`Posting message to webview: ${validated.type}`);
     await this.panel.webview.postMessage(validated);
+  }
+
+  private async reloadBootstrap(): Promise<void> {
+    await this.withLoading(["refs", "commits", "details"], async () => {
+      const bootstrap = await this.service.getBootstrapState();
+      await this.postMessage({
+        type: "bootstrap",
+        payload: bootstrap
+      });
+      this.onStateChanged?.();
+    });
   }
 }
 
