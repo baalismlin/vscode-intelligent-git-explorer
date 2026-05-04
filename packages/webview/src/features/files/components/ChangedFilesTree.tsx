@@ -32,7 +32,7 @@ export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewMod
           {hasChildren ? (isExpanded ? "▾" : "▸") : "•"}
         </span>
         <span className={`file-status ${node.status ? `status-${node.status}` : ""}`.trim()}>{node.status ?? ""}</span>
-        <span className="file-icon">{node.type === "folder" ? "📁" : "📄"}</span>
+        <span className="file-icon">{node.type === "folder" ? "/" : "-"}</span>
         <span className="file-label">{node.name}</span>
       </div>
       {hasChildren && isExpanded

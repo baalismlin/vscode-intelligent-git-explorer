@@ -73,17 +73,17 @@ function RefTreeNode({ node, depth }: { node: GitRefNode; depth: number }): JSX.
 function getRefIcon(type: GitRefNode["type"]): string {
   switch (type) {
     case "head":
-      return "●";
+      return "@";
     case "group":
-      return "▦";
+      return "#";
     case "remote":
-      return "☁";
+      return "R";
     case "localBranch":
     case "remoteBranch":
-      return "⑂";
+      return ">";
     case "tag":
-      return "🏷";
+      return "T";
     default:
-      return "•";
+      return ".";
   }
 }

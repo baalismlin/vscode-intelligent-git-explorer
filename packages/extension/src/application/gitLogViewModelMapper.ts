@@ -79,14 +79,16 @@ export class GitLogViewModelMapper {
   }
 
   private mapChangedFiles(nodes: GitChangedFileNode[]): ChangedFileNodeViewModel[] {
-    return nodes.map((node) => ({
-      id: node.id,
-      name: node.name,
-      path: node.path,
-      type: node.type,
-      status: node.status,
-      children: node.children ? this.mapChangedFiles(node.children) : undefined
-    }));
+    return compressChangedFileNodes(
+      nodes.map((node) => ({
+        id: node.id,
+        name: node.name,
+        path: node.path,
+        type: node.type,
+        status: node.status,
+        children: node.children ? this.mapChangedFiles(node.children) : undefined
+      }))
+    );
   }
 }
 
@@ -101,4 +103,38 @@ function flattenFiles(nodes: ChangedFileNodeViewModel[]): ChangedFileNodeViewMod
   }
 
   return result;
+}
+
+function compressChangedFileNodes(nodes: ChangedFileNodeViewModel[]): ChangedFileNodeViewModel[] {
+  return nodes.map((node) => compressChangedFileNode(node));
+}
+
+function compressChangedFileNode(node: ChangedFileNodeViewModel): ChangedFileNodeViewModel {
+  const compressedChildren = node.children?.map((child) => compressChangedFileNode(child));
+  const normalizedNode: ChangedFileNodeViewModel = {
+    ...node,
+    children: compressedChildren?.length ? compressedChildren : undefined
+  };
+
+  if (normalizedNode.type !== "folder") {
+    return normalizedNode;
+  }
+
+  let currentNode = normalizedNode;
+
+  while (
+    currentNode.children?.length === 1 &&
+    currentNode.children[0].type === "folder" &&
+    !currentNode.children[0].status
+  ) {
+    const onlyChild = currentNode.children[0];
+    currentNode = {
+      ...onlyChild,
+      id: currentNode.id,
+      name: `${currentNode.name}/${onlyChild.name}`,
+      path: onlyChild.path
+    };
+  }
+
+  return currentNode;
 }
