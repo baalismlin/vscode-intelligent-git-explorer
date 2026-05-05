@@ -188,8 +188,12 @@ function RefTreeNode({
     <div className="tree-node">
       <div
         className={`tree-row ${isSelectable ? "clickable" : ""} ${isSelected ? "selected" : ""}`.trim()}
-        onClick={() => {
-          if (!isSelectable) {
+        onClick={(event) => {
+          if (event.detail > 1) {
+            return;
+          }
+
+          if (!isSelectable || isSelected) {
             return;
           }
 
@@ -199,6 +203,11 @@ function RefTreeNode({
               refId: hasHeadChildBranch ? headChildRefId : node.id
             }
           });
+        }}
+        onDoubleClick={() => {
+          if (hasChildren && !forceExpanded) {
+            toggleRefExpanded(node.id);
+          }
         }}
       >
         {Array.from({ length: depth }).map((_, index) => (

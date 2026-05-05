@@ -25,14 +25,18 @@ function CommitRow({ commit, selected }: { commit: CommitListItemViewModel; sele
   return (
     <div
       className={`commit-row ${selected ? "selected" : ""}`.trim()}
-      onClick={() =>
+      onClick={() => {
+        if (selected) {
+          return;
+        }
+
         postMessageToHost({
           type: "selectCommit",
           payload: {
             commitId: commit.id
           }
-        })
-      }
+        });
+      }}
     >
       <div className="commit-cell graph-cell">
         <CommitGraphCell commit={commit} />

@@ -15,7 +15,18 @@ export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewMod
     <div className="tree-node">
       <div
         className={`file-row ${node.type === "file" ? "clickable" : ""} ${isSelected ? "selected" : ""}`.trim()}
-        onClick={() => selectFile(node.id)}
+        onClick={(event) => {
+          if (event.detail > 1) {
+            return;
+          }
+
+          selectFile(node.id);
+        }}
+        onDoubleClick={() => {
+          if (hasChildren) {
+            toggleFileExpanded(node.id);
+          }
+        }}
       >
         {Array.from({ length: depth }).map((_, index) => (
           <span key={`${node.id}-indent-${index}`} className="indent" />
