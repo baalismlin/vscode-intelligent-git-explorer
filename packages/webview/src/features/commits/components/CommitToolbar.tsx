@@ -65,7 +65,7 @@ export function CommitToolbar(): JSX.Element {
         <input
           className="commit-search"
           type="text"
-          placeholder="Text or hash"
+          placeholder="⌕ Text or hash"
           value={filters.searchText}
           onChange={updateFilter("searchText")}
         />

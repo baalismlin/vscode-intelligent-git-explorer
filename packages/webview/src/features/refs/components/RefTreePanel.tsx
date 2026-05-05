@@ -66,7 +66,7 @@ export function RefTreePanel(): JSX.Element {
           className="reference-search"
           type="search"
           value={searchQuery}
-          placeholder="$(alert)Filter references"
+          placeholder="⌕ Filter references"
           onChange={(event) => setSearchQuery(event.target.value)}
         />
       </div>
@@ -108,7 +108,7 @@ export function RefTreePanel(): JSX.Element {
           />
           <RefToolButton
             label="Navigate Log to selected branch HEAD"
-            iconClassName="codicon codicon-history"
+            iconClassName="codicon codicon-issues"
             disabled={!selectedRefId || !selectedRef || !isSelectableRef(selectedRef.type)}
             onClick={() => {
               if (!selectedRefId) {
@@ -215,7 +215,11 @@ function RefTreeNode({
         >
           {hasChildren ? (isExpanded ? "▾" : "▸") : "•"}
         </span>
-        {depth > 0 ? <span className="ref-icon">{getRefIcon(node.type)}</span> : null}
+        {depth > 0 ? (
+          <span className="ref-icon">
+            <span className={getRefIconClassName(node.type)} aria-hidden="true" />
+          </span>
+        ) : null}
         <span className="ref-label">{node.label}</span>
         {node.type === "head" ? <span className="ref-type">current</span> : null}
         {hasHeadChildBranch ? <span className="ref-branch-inline">{headBranchName}</span> : null}
@@ -349,20 +353,21 @@ function findRefById(nodes: GitRefNode[], refId: string): GitRefNode | undefined
   return undefined;
 }
 
-function getRefIcon(type: GitRefNode["type"]): string {
+function getRefIconClassName(type: GitRefNode["type"]): string {
   switch (type) {
     case "head":
-      return "@";
+      return "codicon codicon-target";
     case "group":
-      return "#";
+      return "codicon codicon-folder";
     case "remote":
-      return "R";
+      return "codicon codicon-cloud";
     case "localBranch":
+      return "codicon codicon-git-branch";
     case "remoteBranch":
-      return ">";
+      return "codicon codicon-repo";
     case "tag":
-      return "T";
+      return "codicon codicon-tag";
     default:
-      return ".";
+      return "codicon codicon-circle-filled";
   }
 }

@@ -237,9 +237,17 @@ select {
 }
 
 .reference-tool-button .codicon,
-.commit-tool-button .codicon {
+.commit-tool-button .codicon,
+.ref-icon .codicon,
+.file-icon .codicon {
   font-size: 14px;
   line-height: 1;
+}
+
+.ref-icon .codicon,
+.file-icon .codicon {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .reference-tree-pane {
@@ -430,6 +438,11 @@ select {
 .commit-panel .panel-body {
   overflow: auto;
   background: #ffffff;
+}
+
+.files-panel,
+.files-panel .panel-body {
+  background: rgb(255, 255, 255);
 }
 
 .commit-toolbar {
@@ -636,6 +649,7 @@ select {
   width: 12px;
   flex: 0 0 12px;
   font-size: 10px;
+  margin-left: 2px;
 }
 
 .status-M {

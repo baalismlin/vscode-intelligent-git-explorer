@@ -31,8 +31,12 @@ export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewMod
         >
           {hasChildren ? (isExpanded ? "▾" : "▸") : "•"}
         </span>
-        <span className={`file-status ${node.status ? `status-${node.status}` : ""}`.trim()}>{node.status ?? ""}</span>
-        <span className="file-icon">{node.type === "folder" ? "/" : "-"}</span>
+        <span className="file-icon">
+          <span className={node.type === "folder" ? "codicon codicon-folder" : "codicon codicon-file"} aria-hidden="true" />
+        </span>
+        {node.status && (
+          <span className={`file-status status-${node.status}`}>{node.status}</span>
+        )}
         <span className="file-label">{node.name}</span>
       </div>
       {hasChildren && isExpanded
