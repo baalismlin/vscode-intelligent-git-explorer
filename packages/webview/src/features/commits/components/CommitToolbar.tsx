@@ -1,15 +1,56 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect } from "react";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
+
+const DATE_FILTER_OPTIONS = [
+  { label: "Last 1 Day", value: "1 day ago" },
+  { label: "Last 3 Days", value: "3 days ago" },
+  { label: "Last 7 Days", value: "7 days ago" },
+  { label: "Last 30 Days", value: "30 days ago" }
+] as const;
 
 export function CommitToolbar(): JSX.Element {
   const filters = useGitLogStore((state) => state.filters);
   const setFilters = useGitLogStore((state) => state.setFilters);
 
+  useEffect(() => {
+    if (!filters.branch && !filters.paths) {
+      return;
+    }
+
+    const nextFilters = {
+      ...filters,
+      branch: "",
+      paths: ""
+    };
+    setFilters(nextFilters);
+    postMessageToHost({
+      type: "setFilters",
+      payload: nextFilters
+    });
+  }, [filters, setFilters]);
+
   const updateFilter = (key: keyof typeof filters) => (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const nextFilters = {
       ...filters,
       [key]: event.target.value
+    };
+    setFilters(nextFilters);
+    postMessageToHost({
+      type: "setFilters",
+      payload: nextFilters
+    });
+  };
+
+  const openUserFilterPrompt = () => {
+    const nextUserFilter = window.prompt("Enter one or more authors separated by |", filters.user);
+    if (nextUserFilter === null) {
+      return;
+    }
+
+    const nextFilters = {
+      ...filters,
+      user: nextUserFilter.trim()
     };
     setFilters(nextFilters);
     postMessageToHost({
@@ -28,24 +69,32 @@ export function CommitToolbar(): JSX.Element {
           value={filters.searchText}
           onChange={updateFilter("searchText")}
         />
-        <select className={getFilterClassName(filters.branch)} value={filters.branch} onChange={updateFilter("branch")}>
-          <option value="">Branch</option>
-        </select>
-        <select className={getFilterClassName(filters.user)} value={filters.user} onChange={updateFilter("user")}>
-          <option value="">User</option>
-        </select>
+        <button
+          type="button"
+          className={getFilterButtonClassName(filters.user)}
+          onClick={openUserFilterPrompt}
+          title={filters.user || "User"}
+        >
+          {filters.user || "User"}
+        </button>
         <select className={getFilterClassName(filters.date)} value={filters.date} onChange={updateFilter("date")}>
           <option value="">Date</option>
-        </select>
-        <select className={getFilterClassName(filters.paths)} value={filters.paths} onChange={updateFilter("paths")}>
-          <option value="">Paths</option>
+          {DATE_FILTER_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
       <div className="commit-toolbar-right">
-        <CommitToolButton label="Refresh" icon="R" onClick={() => postMessageToHost({ type: "refresh" })} />
+        <CommitToolButton
+          label="Refresh"
+          iconClassName="codicon codicon-refresh"
+          onClick={() => postMessageToHost({ type: "refresh" })}
+        />
         <CommitToolButton
           label="Cherry-pick"
-          icon="C"
+          iconClassName="codicon codicon-git-commit"
           onClick={() =>
             postMessageToHost({
               type: "runCommand",
@@ -57,7 +106,7 @@ export function CommitToolbar(): JSX.Element {
         />
         <CommitToolButton
           label="Go to hash/branch/tag"
-          icon="G"
+          iconClassName="codicon codicon-search"
           onClick={() =>
             postMessageToHost({
               type: "runCommand",
@@ -72,14 +121,26 @@ export function CommitToolbar(): JSX.Element {
   );
 }
 
-function CommitToolButton({ label, icon, onClick }: { label: string; icon: string; onClick: () => void }): JSX.Element {
+function CommitToolButton({
+  label,
+  iconClassName,
+  onClick
+}: {
+  label: string;
+  iconClassName: string;
+  onClick: () => void;
+}): JSX.Element {
   return (
     <button type="button" className="commit-tool-button" title={label} aria-label={label} onClick={onClick}>
-      {icon}
+      <span className={iconClassName} aria-hidden="true" />
     </button>
   );
 }
 
 function getFilterClassName(value: string): string {
   return value ? "commit-filter" : "commit-filter is-placeholder";
+}
+
+function getFilterButtonClassName(value: string): string {
+  return value ? "commit-filter-button" : "commit-filter-button is-placeholder";
 }

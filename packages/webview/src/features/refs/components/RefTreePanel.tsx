@@ -46,7 +46,7 @@ export function RefTreePanel(): JSX.Element {
         <div className="reference-collapsed-rail">
           <RefToolButton
             label="Show Git Branches"
-            icon=">"
+            iconClassName="codicon codicon-chevron-right"
             onClick={() =>
               setPanelLayout({
                 refsWidth: Math.max(lastExpandedWidthRef.current, defaultExpandedRefsWidth)
@@ -66,7 +66,7 @@ export function RefTreePanel(): JSX.Element {
           className="reference-search"
           type="search"
           value={searchQuery}
-          placeholder="Filter references"
+          placeholder="$(alert)Filter references"
           onChange={(event) => setSearchQuery(event.target.value)}
         />
       </div>
@@ -74,25 +74,41 @@ export function RefTreePanel(): JSX.Element {
         <div className="reference-tools">
           <RefToolButton
             label="Hide Git Branches"
-            icon="<"
+            iconClassName="codicon codicon-chevron-left"
             onClick={() =>
               setPanelLayout({
                 refsWidth: collapsedRefsWidth
               })
             }
           />
-          <RefToolButton label="New Branch" icon="+" onClick={() => runRefCommand("refs:newBranch")} />
-          <RefToolButton label="Update Selected" icon="U" onClick={() => runRefCommand("refs:updateSelected")} />
-          <RefToolButton label="Delete" icon="D" onClick={() => runRefCommand("refs:deleteSelected")} />
+          <RefToolButton
+            label="New Branch"
+            iconClassName="codicon codicon-git-branch"
+            onClick={() => runRefCommand("refs:newBranch")}
+          />
+          <RefToolButton
+            label="Update Selected"
+            iconClassName="codicon codicon-sync"
+            onClick={() => runRefCommand("refs:updateSelected")}
+          />
+          <RefToolButton
+            label="Delete"
+            iconClassName="codicon codicon-trash"
+            onClick={() => runRefCommand("refs:deleteSelected")}
+          />
           <RefToolButton
             label="Compare with Current"
-            icon="C"
+            iconClassName="codicon codicon-diff"
             onClick={() => runRefCommand("refs:compareWithCurrent")}
           />
-          <RefToolButton label="Fetch" icon="F" onClick={() => runRefCommand("refs:fetch")} />
+          <RefToolButton
+            label="Fetch"
+            iconClassName="codicon codicon-cloud-download"
+            onClick={() => runRefCommand("refs:fetch")}
+          />
           <RefToolButton
             label="Navigate Log to selected branch HEAD"
-            icon="H"
+            iconClassName="codicon codicon-history"
             disabled={!selectedRefId || !selectedRef || !isSelectableRef(selectedRef.type)}
             onClick={() => {
               if (!selectedRefId) {
@@ -109,12 +125,20 @@ export function RefTreePanel(): JSX.Element {
           />
           <RefToolButton
             label="Group by Directory"
-            icon="/"
+            iconClassName="codicon codicon-list-tree"
             active={groupByDirectory}
             onClick={() => setGroupByDirectory((value) => !value)}
           />
-          <RefToolButton label="Expand All" icon="E" onClick={() => setExpandedRefs(expandableRefIds)} />
-          <RefToolButton label="Collapse All" icon="X" onClick={() => setExpandedRefs([])} />
+          <RefToolButton
+            label="Expand All"
+            iconClassName="codicon codicon-expand-all"
+            onClick={() => setExpandedRefs(expandableRefIds)}
+          />
+          <RefToolButton
+            label="Collapse All"
+            iconClassName="codicon codicon-collapse-all"
+            onClick={() => setExpandedRefs([])}
+          />
         </div>
         <div className="reference-tree-pane">
           <div className="reference-tree-content">
@@ -207,13 +231,13 @@ function RefTreeNode({
 
 function RefToolButton({
   label,
-  icon,
+  iconClassName,
   active = false,
   disabled = false,
   onClick
 }: {
   label: string;
-  icon: string;
+  iconClassName: string;
   active?: boolean;
   disabled?: boolean;
   onClick: () => void;
@@ -227,7 +251,7 @@ function RefToolButton({
       disabled={disabled}
       onClick={onClick}
     >
-      {icon}
+      <span className={iconClassName} aria-hidden="true" />
     </button>
   );
 }

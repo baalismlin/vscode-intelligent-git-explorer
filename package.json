@@ -33,6 +33,7 @@
     "watch": "pnpm --filter @intellij-git-log/extension build --watch"
   },
   "dependencies": {
-    "@intellij-git-log/contracts": "workspace:*"
+    "@intellij-git-log/contracts": "workspace:*",
+    "@vscode/codicons": "^0.0.36"
   }
 }

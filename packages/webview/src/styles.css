@@ -92,10 +92,10 @@ select {
 .resize-handle {
   position: relative;
   cursor: col-resize;
-  background: linear-gradient(to bottom, rgba(216, 221, 230, 0), rgba(216, 221, 230, 0.9), rgba(216, 221, 230, 0));
+  background: rgba(216, 221, 230, 0.9);
   touch-action: none;
   user-select: none;
-  min-width: 8px;
+  min-width: 1px;
 }
 
 .resize-handle::before {
@@ -103,7 +103,7 @@ select {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 3px;
+  left: 0;
   width: 1px;
   background: rgba(198, 204, 215, 0.9);
 }
@@ -234,6 +234,12 @@ select {
 .reference-tool-button:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+.reference-tool-button .codicon,
+.commit-tool-button .codicon {
+  font-size: 14px;
+  line-height: 1;
 }
 
 .reference-tree-pane {
@@ -486,7 +492,25 @@ select {
   -webkit-appearance: none;
 }
 
+.commit-filter-button {
+  min-width: 0;
+  max-width: 180px;
+  height: 26px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .commit-filter.is-placeholder {
+  color: var(--muted);
+}
+
+.commit-filter-button.is-placeholder {
   color: var(--muted);
 }
 

@@ -27,7 +27,10 @@ export class GitLogPanel {
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-        localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, "packages", "webview", "dist")]
+        localResourceRoots: [
+          vscode.Uri.joinPath(context.extensionUri, "packages", "webview", "dist"),
+          vscode.Uri.joinPath(context.extensionUri, "node_modules", "@vscode", "codicons", "dist")
+        ]
       }
     );
 
@@ -93,9 +96,18 @@ export class GitLogPanel {
   private async initializeWebview(extensionUri: vscode.Uri): Promise<void> {
     const stylePath = vscode.Uri.joinPath(extensionUri, "packages", "webview", "dist", "gitLogWebview.css");
     const scriptPath = vscode.Uri.joinPath(extensionUri, "packages", "webview", "dist", "gitLogWebview.js");
+    const codiconStylePath = vscode.Uri.joinPath(
+      extensionUri,
+      "node_modules",
+      "@vscode",
+      "codicons",
+      "dist",
+      "codicon.css"
+    );
 
     await this.verifyResourceExists(stylePath);
     await this.verifyResourceExists(scriptPath);
+    await this.verifyResourceExists(codiconStylePath);
 
     const html = this.getHtmlForWebview(this.panel.webview, extensionUri);
     outputLogger.info(
@@ -120,6 +132,9 @@ export class GitLogPanel {
     const styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(extensionUri, "packages", "webview", "dist", "gitLogWebview.css")
     );
+    const codiconStyleUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(extensionUri, "node_modules", "@vscode", "codicons", "dist", "codicon.css")
+    );
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(extensionUri, "packages", "webview", "dist", "gitLogWebview.js")
     );
@@ -131,10 +146,11 @@ export class GitLogPanel {
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';"
+      content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IntelliJ Git Log</title>
+    <link rel="stylesheet" href="${codiconStyleUri}" />
     <link rel="stylesheet" href="${styleUri}" />
   </head>
   <body>

@@ -72,7 +72,7 @@ export function ResizableSplitLayout({
   }, [minRefsWidth, minCenterWidth, minDetailsWidth, onResize]);
 
   const style = {
-    gridTemplateColumns: `${resolvedLayout.refsWidth}px 8px minmax(${minCenterWidth}px, 1fr) 8px ${resolvedLayout.detailsWidth}px`
+    gridTemplateColumns: `${resolvedLayout.refsWidth}px 1px minmax(${minCenterWidth}px, 1fr) 1px ${resolvedLayout.detailsWidth}px`
   } satisfies CSSProperties;
 
   const startResize = (side: "left" | "right") => (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -159,7 +159,7 @@ function resolveLayout({
     };
   }
 
-  const separatorWidth = 16;
+  const separatorWidth = 2;
   const maxRefsWidth = availableWidth - minCenterWidth - minDetailsWidth - separatorWidth;
   const safeRefsWidth = clamp(refsWidth, minRefsWidth, maxRefsWidth);
   const maxDetailsWidth = availableWidth - minCenterWidth - safeRefsWidth - separatorWidth;
