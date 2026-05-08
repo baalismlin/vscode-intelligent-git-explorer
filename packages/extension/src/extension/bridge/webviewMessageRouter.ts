@@ -150,7 +150,6 @@ export class WebviewMessageRouter {
         });
         return;
       }
-      case "loadMoreCommits":
       case "openFile":
       case "openDiff":
         await this.postMessage({

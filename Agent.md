@@ -37,8 +37,8 @@
   - UI decoupled from provider implementation
   - Real refs / commits / changed files flow
   - Stale persisted mock state recovery
+  - `loadMoreCommits` removed in favor of full Git log loading
 - Remaining:
-  - `loadMoreCommits`
   - `openFile`
   - `openDiff`
   - `refs:deleteSelected`
@@ -46,12 +46,13 @@
   - `commits:cherryPick`
 
 ### Performance And Engineering Stage
-- Status: Not started
+- Status: Started
+- Completed:
+  - Virtual scrolling for the commits list
 - Remaining:
   - Unit tests
   - Bridge contract tests
   - Core interaction tests
-  - Virtual scrolling
   - Lint / build hardening / performance safeguards
 
 ## Current Position
@@ -64,12 +65,12 @@ The project has completed the main body of the data integration stage and is now
 The most accurate current label is:
 
 - Data integration stage: main work completed, pending action-level closure
+- Performance stage: started through commit list virtualization
 
 ## High Priority Remaining Work
 
 - Implement `openFile`
 - Implement `openDiff`
-- Decide whether `loadMoreCommits` is true pagination or should be removed for now
 - Decide whether `Delete`, `Compare`, and `Cherry-pick` should be implemented now or removed from the UI temporarily
 
 ## Compressed Context
@@ -92,8 +93,8 @@ The most accurate current label is:
   - changed files tree
   - panel persistence
   - codicon integration
+  - commit list virtual scrolling
 - Unimplemented actions:
-  - `loadMoreCommits`
   - `openFile`
   - `openDiff`
   - `refs:deleteSelected`
@@ -102,5 +103,8 @@ The most accurate current label is:
 - Recommended next stage focus:
   - tests
   - bridge contract coverage
-  - virtual scrolling
   - engineering hardening
+
+## Maintenance Rule
+
+- After each completed feature, update this file so stage status, remaining work, and compressed context stay aligned with the codebase.

@@ -13,8 +13,6 @@ import { GitLogProvider } from "#domain/gitLogProvider";
 const execFileAsync = promisify(execFile);
 const fieldSeparator = "\u001f";
 const recordSeparator = "\u001e";
-const commitLimit = 200;
-
 export class RealGitLogProvider implements GitLogProvider {
   private readonly repositoryRoot: string;
 
@@ -165,7 +163,6 @@ export class RealGitLogProvider implements GitLogProvider {
     const args = [
       "log",
       targetRef,
-      `--max-count=${commitLimit}`,
       "--date=format-local:%Y-%m-%d %H:%M",
       `--pretty=format:%H${fieldSeparator}%h${fieldSeparator}%an${fieldSeparator}%ad${fieldSeparator}%s${recordSeparator}`
     ];

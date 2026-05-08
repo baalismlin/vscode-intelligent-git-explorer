@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { CommitDetailViewModel, CommitListItemViewModel, GitLogBootstrapViewModel } from "./gitLogViewModels";
+import {
+  CommitDetailViewModel,
+  CommitListItemViewModel,
+  GitLogBootstrapViewModel
+} from "./gitLogViewModels";
 
 const changedFileNodeSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
@@ -144,9 +148,6 @@ export const webviewToExtensionMessageSchema = z.discriminatedUnion("type", [
   }),
   z.object({
     type: z.literal("refresh")
-  }),
-  z.object({
-    type: z.literal("loadMoreCommits")
   }),
   z.object({
     type: z.literal("openFile"),

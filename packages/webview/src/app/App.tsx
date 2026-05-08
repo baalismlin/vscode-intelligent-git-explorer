@@ -152,6 +152,10 @@ function handleRefNavigation(key: string): boolean {
 
 function handleCommitNavigation(key: string): boolean {
   const store = useGitLogStore.getState();
+  if (store.loading.commits) {
+    return false;
+  }
+
   const commitIds = store.commits.map((commit) => commit.id);
   const currentIndex = findCurrentIndex(commitIds, store.selection.selectedCommitId);
 
