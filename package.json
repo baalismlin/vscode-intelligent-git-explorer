@@ -16,6 +16,9 @@
   "activationEvents": [
     "onCommand:intellijGitLog.open"
   ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "main": "./packages/extension/dist/extension.js",
   "contributes": {
     "commands": [

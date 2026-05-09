@@ -218,6 +218,14 @@ function handleFileNavigation(key: string): boolean {
     return true;
   }
 
+  if (key === "Enter" && currentItem.selectable) {
+    postMessageToHost({
+      type: "openDiff",
+      payload: { path: currentItem.path }
+    });
+    return true;
+  }
+
   return false;
 }
 

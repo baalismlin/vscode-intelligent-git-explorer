@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as path from "node:path";
 import { SelectionState } from "@intellij-git-log/contracts/gitLogModels";
 import {
   CommitDetailViewModel,
@@ -11,6 +12,21 @@ import {
 } from "@intellij-git-log/contracts/gitLogProtocol";
 import { GitLogApplicationService } from "#application/gitLogApplicationService";
 import { outputLogger } from "#extension/logging/outputLogger";
+
+interface GitExtension {
+  getAPI(version: 1): GitApi;
+}
+
+interface GitApi {
+  toGitUri(uri: vscode.Uri, ref: string): vscode.Uri;
+  getRepository(uri: vscode.Uri): GitRepository | null;
+}
+
+interface GitRepository {
+  getCommit(ref: string): Promise<{ hash: string }>;
+  diffBetweenPatch(ref1: string, ref2: string, path?: string): Promise<string>;
+  apply(patch: string, options?: { allowEmpty?: boolean; reverse?: boolean; threeWay?: boolean }): Promise<void>;
+}
 
 export class WebviewMessageRouter {
   private readonly panel: vscode.WebviewPanel;
@@ -151,11 +167,13 @@ export class WebviewMessageRouter {
         return;
       }
       case "openFile":
+        await this.handleOpenFile(message.payload.path);
+        return;
       case "openDiff":
-        await this.postMessage({
-          type: "errorOccurred",
-          payload: { message: `Action ${message.type} is not implemented yet.` }
-        });
+        await this.handleOpenDiff(message.payload.path);
+        return;
+      case "revertSelectedChanges":
+        await this.handleRevertSelectedChanges(message.payload.path);
         return;
       case "runCommand":
         await this.handleRunCommand(message.payload.command);
@@ -163,6 +181,104 @@ export class WebviewMessageRouter {
       default:
         return;
     }
+  }
+
+  private async handleOpenFile(filePath: string): Promise<void> {
+    const fileUri = this.resolveWorkspaceFileUri(filePath);
+    outputLogger.info(`Opening file: ${fileUri.fsPath}`);
+    await vscode.commands.executeCommand("vscode.open", fileUri);
+  }
+
+  private async handleOpenDiff(filePath: string): Promise<void> {
+    const selectedCommitId = this.service.getSelection().selectedCommitId;
+    if (!selectedCommitId) {
+      await this.postMessage({
+        type: "errorOccurred",
+        payload: { message: "No commit is selected." }
+      });
+      return;
+    }
+
+    const gitExtension = vscode.extensions.getExtension<GitExtension>("vscode.git");
+    if (!gitExtension) {
+      await this.postMessage({
+        type: "errorOccurred",
+        payload: { message: "VS Code Git extension is not available." }
+      });
+      return;
+    }
+
+    const gitApi = gitExtension.isActive ? gitExtension.exports.getAPI(1) : (await gitExtension.activate()).getAPI(1);
+    const fileUri = this.resolveWorkspaceFileUri(filePath);
+    const repository = gitApi.getRepository(fileUri);
+    const previousRef = `${selectedCommitId}^`;
+    const previousUri = gitApi.toGitUri(fileUri, previousRef);
+    const selectedUri = gitApi.toGitUri(fileUri, selectedCommitId);
+    const previousCommit = await repository?.getCommit(previousRef);
+    const previousShortHash = (previousCommit?.hash ?? previousRef).slice(0, 7);
+    const title = `${path.basename(filePath)} (${previousShortHash} - ${selectedCommitId.slice(0, 7)})`;
+
+    outputLogger.info(`Opening diff for ${filePath} at commit ${selectedCommitId}`);
+    await vscode.commands.executeCommand("vscode.diff", previousUri, selectedUri, title);
+  }
+
+  private async handleRevertSelectedChanges(filePath: string): Promise<void> {
+    const selectedCommitId = this.service.getSelection().selectedCommitId;
+    if (!selectedCommitId) {
+      await this.postMessage({
+        type: "errorOccurred",
+        payload: { message: "No commit is selected." }
+      });
+      return;
+    }
+
+    const confirmation = await vscode.window.showWarningMessage(
+      `Revert selected changes in ${filePath}? This will modify your working tree.`,
+      { modal: true },
+      "Revert"
+    );
+    if (confirmation !== "Revert") {
+      return;
+    }
+
+    const gitExtension = vscode.extensions.getExtension<GitExtension>("vscode.git");
+    if (!gitExtension) {
+      await this.postMessage({
+        type: "errorOccurred",
+        payload: { message: "VS Code Git extension is not available." }
+      });
+      return;
+    }
+
+    const gitApi = gitExtension.isActive ? gitExtension.exports.getAPI(1) : (await gitExtension.activate()).getAPI(1);
+    const fileUri = this.resolveWorkspaceFileUri(filePath);
+    const repository = gitApi.getRepository(fileUri);
+    if (!repository) {
+      await this.postMessage({
+        type: "errorOccurred",
+        payload: { message: "No Git repository was found for the selected file." }
+      });
+      return;
+    }
+
+    const previousRef = `${selectedCommitId}^`;
+    const patch = await repository.diffBetweenPatch(previousRef, selectedCommitId, filePath);
+    if (!patch.trim()) {
+      await this.postMessage({
+        type: "errorOccurred",
+        payload: { message: "No changes were found for the selected file." }
+      });
+      return;
+    }
+
+    outputLogger.info(`Reverting selected changes for ${filePath} at commit ${selectedCommitId}`);
+    await repository.apply(patch, { reverse: true, threeWay: true });
+    await this.reloadBootstrap();
+  }
+
+  private resolveWorkspaceFileUri(filePath: string): vscode.Uri {
+    const repositoryRoot = this.service.getRepositoryRoot();
+    return vscode.Uri.file(path.isAbsolute(filePath) ? filePath : path.join(repositoryRoot, filePath));
   }
 
   private async handleRunCommand(command: string): Promise<void> {

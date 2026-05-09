@@ -52,6 +52,7 @@ interface GitLogStoreState {
   toggleRefExpanded: (refId: string) => void;
   setExpandedRefs: (refIds: string[]) => void;
   toggleFileExpanded: (fileId: string) => void;
+  setExpandedFiles: (fileIds: string[]) => void;
   selectFile: (fileId: string) => void;
   setPanelLayout: (layout: Partial<PanelLayoutState>) => void;
   setFocusedPane: (pane: FocusedPane) => void;
@@ -165,6 +166,7 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
     set((state) => ({
       expandedFiles: toggleInArray(state.expandedFiles, fileId)
     })),
+  setExpandedFiles: (fileIds) => set({ expandedFiles: fileIds }),
   selectFile: (fileId) => set({ selectedFileId: fileId }),
   setPanelLayout: (layout) =>
     set((state) => ({

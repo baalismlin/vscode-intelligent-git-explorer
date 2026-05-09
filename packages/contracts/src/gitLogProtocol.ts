@@ -162,6 +162,12 @@ export const webviewToExtensionMessageSchema = z.discriminatedUnion("type", [
     })
   }),
   z.object({
+    type: z.literal("revertSelectedChanges"),
+    payload: z.object({
+      path: z.string()
+    })
+  }),
+  z.object({
     type: z.literal("runCommand"),
     payload: z.object({
       command: z.string()

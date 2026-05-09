@@ -10,6 +10,7 @@ export interface VisibleRefItem {
 
 export interface VisibleFileItem {
   id: string;
+  path: string;
   expandable: boolean;
   expanded: boolean;
   selectable: boolean;
@@ -46,6 +47,7 @@ export function getVisibleFiles(nodes: ChangedFileNodeViewModel[], expandedIds: 
       const expandable = Boolean(node.children?.length);
       visible.push({
         id: node.id,
+        path: node.path,
         expandable,
         expanded: expandedIds.includes(node.id),
         selectable: node.type === "file"

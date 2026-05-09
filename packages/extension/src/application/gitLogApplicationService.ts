@@ -152,6 +152,10 @@ export class GitLogApplicationService {
     return this.selection;
   }
 
+  public getRepositoryRoot(): string {
+    return this.repositoryRoot;
+  }
+
   public async navigateToRefOrHash(query: string): Promise<{
     commits: CommitListItemViewModel[];
     selectedCommitDetail: CommitDetailViewModel | null;

@@ -38,9 +38,8 @@
   - Real refs / commits / changed files flow
   - Stale persisted mock state recovery
   - `loadMoreCommits` removed in favor of full Git log loading
+  - Details toolbar with show diff, revert selected changes, expand all, and collapse all
 - Remaining:
-  - `openFile`
-  - `openDiff`
   - `refs:deleteSelected`
   - `refs:compareWithCurrent`
   - `commits:cherryPick`
@@ -69,8 +68,6 @@ The most accurate current label is:
 
 ## High Priority Remaining Work
 
-- Implement `openFile`
-- Implement `openDiff`
 - Decide whether `Delete`, `Compare`, and `Cherry-pick` should be implemented now or removed from the UI temporarily
 
 ## Compressed Context
@@ -94,9 +91,8 @@ The most accurate current label is:
   - panel persistence
   - codicon integration
   - commit list virtual scrolling
+  - details toolbar actions
 - Unimplemented actions:
-  - `openFile`
-  - `openDiff`
   - `refs:deleteSelected`
   - `refs:compareWithCurrent`
   - `commits:cherryPick`

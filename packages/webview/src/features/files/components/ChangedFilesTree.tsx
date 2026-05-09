@@ -1,4 +1,5 @@
 import { ChangedFileNodeViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
+import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
 
 export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewModel; depth: number }): JSX.Element {
@@ -10,6 +11,7 @@ export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewMod
   const hasChildren = Boolean(node.children?.length);
   const isExpanded = expandedFiles.includes(node.id);
   const isSelected = selectedFileId === node.id;
+  const fileCount = node.type === "folder" ? countFiles(node) : 0;
 
   return (
     <div className="tree-node">
@@ -25,6 +27,14 @@ export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewMod
         onDoubleClick={() => {
           if (hasChildren) {
             toggleFileExpanded(node.id);
+            return;
+          }
+
+          if (node.type === "file") {
+            postMessageToHost({
+              type: "openDiff",
+              payload: { path: node.path }
+            });
           }
         }}
       >
@@ -49,10 +59,19 @@ export function ChangedFilesTree({ node, depth }: { node: ChangedFileNodeViewMod
           <span className={`file-status status-${node.status}`}>{node.status}</span>
         )}
         <span className="file-label">{node.name}</span>
+        {node.type === "folder" ? <span className="file-count">{fileCount} files</span> : null}
       </div>
       {hasChildren && isExpanded
         ? node.children?.map((child) => <ChangedFilesTree key={child.id} node={child} depth={depth + 1} />)
         : null}
     </div>
   );
+}
+
+function countFiles(node: ChangedFileNodeViewModel): number {
+  if (node.type === "file") {
+    return 1;
+  }
+
+  return node.children?.reduce((count, child) => count + countFiles(child), 0) ?? 0;
 }
