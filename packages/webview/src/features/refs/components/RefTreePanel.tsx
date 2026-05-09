@@ -1,5 +1,6 @@
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { GitRefNode } from "@intellij-git-log/contracts/gitLogModels";
+import { WebviewCommand } from "@intellij-git-log/contracts/webviewToExtensionProtocol";
 import { isSelectableRef } from "@app/navigation";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
@@ -269,7 +270,7 @@ function RefToolButton({
   );
 }
 
-function runRefCommand(command: string): void {
+function runRefCommand(command: WebviewCommand): void {
   postMessageToHost({
     type: "runCommand",
     payload: {

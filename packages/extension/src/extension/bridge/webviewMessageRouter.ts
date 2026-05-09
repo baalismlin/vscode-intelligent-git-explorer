@@ -7,9 +7,12 @@ import {
 } from "@intellij-git-log/contracts/gitLogViewModels";
 import {
   extensionToWebviewMessageSchema,
-  ExtensionToWebviewMessage,
+  ExtensionToWebviewMessage
+} from "@intellij-git-log/contracts/extensionToWebviewProtocol";
+import {
+  WebviewCommand,
   webviewToExtensionMessageSchema
-} from "@intellij-git-log/contracts/gitLogProtocol";
+} from "@intellij-git-log/contracts/webviewToExtensionProtocol";
 import { GitLogApplicationService } from "#application/gitLogApplicationService";
 import { outputLogger } from "#extension/logging/outputLogger";
 
@@ -281,7 +284,7 @@ export class WebviewMessageRouter {
     return vscode.Uri.file(path.isAbsolute(filePath) ? filePath : path.join(repositoryRoot, filePath));
   }
 
-  private async handleRunCommand(command: string): Promise<void> {
+  private async handleRunCommand(command: WebviewCommand): Promise<void> {
     switch (command) {
       case "refs:newBranch":
         await vscode.commands.executeCommand("git.branch");

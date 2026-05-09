@@ -15,7 +15,7 @@
 - Completed:
   - Domain models and view models
   - Mapper / adapter layer
-  - Mock provider and provider interface split
+  - Provider interface split
   - Application / domain / infrastructure separation
 
 ### Interaction Enhancement Stage
@@ -36,7 +36,7 @@
   - Real Git data source integration
   - UI decoupled from provider implementation
   - Real refs / commits / changed files flow
-  - Stale persisted mock state recovery
+  - Stale persisted state recovery
   - `loadMoreCommits` removed in favor of full Git log loading
   - Details toolbar with show diff, revert selected changes, expand all, and collapse all
 - Remaining:

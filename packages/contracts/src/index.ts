@@ -1,3 +1,5 @@
 export * from "./gitLogModels";
 export * from "./gitLogViewModels";
-export * from "./gitLogProtocol";
+export * from "./gitLogProtocolSchemas";
+export * from "./extensionToWebviewProtocol";
+export * from "./webviewToExtensionProtocol";

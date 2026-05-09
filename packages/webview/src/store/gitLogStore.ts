@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { FilterState, GitRefNode, SelectionState } from "@intellij-git-log/contracts/gitLogModels";
 import { CommitDetailViewModel, CommitListItemViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
-import { BootstrapPayload } from "@intellij-git-log/contracts/gitLogProtocol";
+import { GitLogBootstrapViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
 
 export type FocusedPane = "refs" | "commits" | "files";
 
@@ -39,7 +39,7 @@ interface GitLogStoreState {
   loading: LoadingState;
   errorMessage: string;
   persistedUiState?: PersistedWebviewState;
-  bootstrap: (payload: BootstrapPayload) => void;
+  bootstrap: (payload: GitLogBootstrapViewModel) => void;
   restorePersistedUiState: (state: PersistedWebviewState) => void;
   setRefs: (refs: GitRefNode[]) => void;
   setCommits: (refId: string, commits: CommitListItemViewModel[]) => void;

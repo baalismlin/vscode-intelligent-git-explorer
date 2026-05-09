@@ -22,10 +22,20 @@
       "import": "./dist/esm/gitLogViewModels.js",
       "require": "./dist/cjs/gitLogViewModels.js"
     },
-    "./gitLogProtocol": {
-      "types": "./dist/types/gitLogProtocol.d.ts",
-      "import": "./dist/esm/gitLogProtocol.js",
-      "require": "./dist/cjs/gitLogProtocol.js"
+    "./gitLogProtocolSchemas": {
+      "types": "./dist/types/gitLogProtocolSchemas.d.ts",
+      "import": "./dist/esm/gitLogProtocolSchemas.js",
+      "require": "./dist/cjs/gitLogProtocolSchemas.js"
+    },
+    "./extensionToWebviewProtocol": {
+      "types": "./dist/types/extensionToWebviewProtocol.d.ts",
+      "import": "./dist/esm/extensionToWebviewProtocol.js",
+      "require": "./dist/cjs/extensionToWebviewProtocol.js"
+    },
+    "./webviewToExtensionProtocol": {
+      "types": "./dist/types/webviewToExtensionProtocol.d.ts",
+      "import": "./dist/esm/webviewToExtensionProtocol.js",
+      "require": "./dist/cjs/webviewToExtensionProtocol.js"
     }
   },
   "scripts": {

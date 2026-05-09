@@ -1,4 +1,4 @@
-import { WebviewToExtensionMessage } from "@intellij-git-log/contracts/gitLogProtocol";
+import { WebviewToExtensionMessage } from "@intellij-git-log/contracts/webviewToExtensionProtocol";
 
 interface VsCodeApi {
   postMessage(message: unknown): void;
