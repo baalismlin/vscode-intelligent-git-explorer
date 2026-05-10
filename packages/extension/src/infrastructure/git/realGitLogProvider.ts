@@ -8,6 +8,11 @@ import {
   GitCommitSummary,
   GitRefNode
 } from "@intelligent-git-log/contracts/gitLogModels";
+import {
+  GitExecutableNotFoundError,
+  GitReferenceUnavailableError,
+  GitRepositoryNotFoundError
+} from "#domain/gitLogErrors";
 import { GitLogProvider } from "#domain/gitLogProvider";
 
 const execFileAsync = promisify(execFile);
@@ -387,16 +392,16 @@ function normalizeStatus(rawStatus: string): ChangedFileStatus {
 function toGitProviderError(error: unknown, repositoryRoot: string): Error {
   if (isExecError(error)) {
     if (error.code === "ENOENT") {
-      return new Error("Git executable was not found in the current environment.");
+      return new GitExecutableNotFoundError();
     }
 
     const detail = `${error.stderr ?? error.message}`.trim();
     if (detail.includes("not a git repository")) {
-      return new Error(`The workspace folder is not a Git repository: ${repositoryRoot}`);
+      return new GitRepositoryNotFoundError(repositoryRoot);
     }
 
     if (detail.includes("unknown revision or path not in the working tree")) {
-      return new Error("The selected Git reference is no longer available.");
+      return new GitReferenceUnavailableError();
     }
 
     return new Error(detail || "Failed to read data from the Git repository.");

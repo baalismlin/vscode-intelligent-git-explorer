@@ -14,6 +14,7 @@ import {
   WebviewToExtensionMessage,
   webviewToExtensionMessageSchema
 } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
+import { GitReferenceUnavailableError } from "#domain/gitLogErrors";
 import { GitLogApplicationService } from "#application/gitLogApplicationService";
 import { outputLogger } from "#extension/logging/outputLogger";
 
@@ -77,7 +78,7 @@ export class WebviewMessageRouter {
           await this.enqueueMessage(result.data);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          if (result.data.type === "ready" && isInvalidPersistedStateError(message)) {
+          if (result.data.type === "ready" && error instanceof GitReferenceUnavailableError) {
             outputLogger.warn(`Clearing persisted state after bootstrap failure: ${message}`);
             this.service.resetPersistedState();
             await this.onStateCleared?.();
@@ -489,8 +490,4 @@ function safeJson(value: unknown): string {
   } catch {
     return "[unserializable]";
   }
-}
-
-function isInvalidPersistedStateError(message: string): boolean {
-  return message.includes("The selected Git reference is no longer available.");
 }
