@@ -37,7 +37,7 @@ export class GitLogViewSynchronizer {
         type: "bootstrap",
         payload: bootstrap
       });
-      this.onStateChanged?.();
+      this.notifyStateChanged();
     });
   }
 
@@ -70,7 +70,7 @@ export class GitLogViewSynchronizer {
         detail: selectedCommitDetail
       }
     });
-    this.onStateChanged?.();
+    this.notifyStateChanged();
   }
 
   public notifyStateChanged(): void {

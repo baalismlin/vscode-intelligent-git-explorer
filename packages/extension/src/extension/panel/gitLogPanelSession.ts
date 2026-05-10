@@ -20,6 +20,7 @@ export class GitLogPanelSession {
   private readonly panel: vscode.WebviewPanel;
   private readonly serviceFactory: GitLogServiceFactory;
   private readonly disposables: vscode.Disposable[] = [];
+  private isDisposed = false;
   private router?: WebviewMessageRouter;
 
   public constructor(options: GitLogPanelSessionOptions) {
@@ -29,7 +30,7 @@ export class GitLogPanelSession {
     this.panel = options.panel;
     this.serviceFactory = options.serviceFactory;
 
-    this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
+    this.disposables.push(this.panel.onDidDispose(() => this.dispose()));
     this.initialize();
   }
 
@@ -38,14 +39,21 @@ export class GitLogPanelSession {
   }
 
   public dispose(): void {
-    this.onDidDisposeCallback(this);
+    if (this.isDisposed) {
+      return;
+    }
+
+    this.isDisposed = true;
     outputLogger.info("Disposing Git Log panel.");
+
+    this.onDidDisposeCallback(this);
     this.router?.dispose();
     this.router = undefined;
 
     while (this.disposables.length > 0) {
       this.disposables.pop()?.dispose();
     }
+    this.panel.dispose();
   }
 
   private initialize(): void {
@@ -66,15 +74,12 @@ export class GitLogPanelSession {
       () => this.serviceFactory.clearPersistedState(serviceSession.persistenceKey)
     );
 
-    this.panel.onDidChangeViewState(
-      (event) => {
-        outputLogger.info(
-          `Panel view state changed. visible=${event.webviewPanel.visible} active=${event.webviewPanel.active}`
-        );
-      },
-      null,
-      this.disposables
-    );
+    this.panel.onDidChangeViewState((event) => {
+      outputLogger.info(
+        `Panel view state changed. visible=${event.webviewPanel.visible} active=${event.webviewPanel.active}`
+      );
+    }, null, this.disposables);
+
     this.initializeWebview().catch((error) => {
       const reason = error instanceof Error ? error.message : String(error);
       outputLogger.error(`Failed to initialize webview: ${reason}`);

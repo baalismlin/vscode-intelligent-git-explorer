@@ -31,27 +31,29 @@ export class WebviewMessageRouter {
     this.controller = new GitLogMessageController(service, this.messenger, onStateChanged);
 
     this.disposables.push(
-      panel.webview.onDidReceiveMessage(async (rawMessage) => {
-        outputLogger.info(`Message received from webview: ${safeJson(rawMessage)}`);
-        const result = webviewToExtensionMessageSchema.safeParse(rawMessage);
-        if (!result.success) {
-          outputLogger.error(`Invalid message from webview: ${result.error.message}`);
-          void this.messenger.postError("Invalid message from webview.");
-          return;
-        }
-
-        try {
-          await this.queue.enqueue(result.data.type, (execution) => this.controller.handleMessage(result.data, execution));
-        } catch (error) {
-          await this.handleMessageError(result.data.type, error);
-        }
-      })
+      panel.webview.onDidReceiveMessage((rawMessage) => this.handleReceiveMessage(rawMessage))
     );
   }
 
   public dispose(): void {
     while (this.disposables.length > 0) {
       this.disposables.pop()?.dispose();
+    }
+  }
+
+  private async handleReceiveMessage(rawMessage: any): Promise<void> {
+    outputLogger.info(`Message received from webview: ${safeJson(rawMessage)}`);
+    const result = webviewToExtensionMessageSchema.safeParse(rawMessage);
+    if (!result.success) {
+      outputLogger.error(`Invalid message from webview: ${result.error.message}`);
+      void this.messenger.postError("Invalid message from webview.");
+      return;
+    }
+
+    try {
+      await this.queue.enqueue(result.data.type, (execution) => this.controller.handleMessage(result.data, execution));
+    } catch (error) {
+      await this.handleMessageError(result.data.type, error);
     }
   }
 
