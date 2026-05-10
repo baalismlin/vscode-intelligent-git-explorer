@@ -1,14 +1,14 @@
 import {
-  ChangedFileNodeViewModel,
-  CommitDetailViewModel,
-  CommitGraphViewModel,
-  CommitListItemViewModel
+  type ChangedFileNodeViewModel,
+  type CommitDetailViewModel,
+  type CommitGraphViewModel,
+  type CommitListItemViewModel
 } from "@intelligent-git-log/contracts/gitLogViewModels";
 import {
-  GitChangedFileNode,
-  GitCommitDetail,
-  GitCommitSummary,
-  GitRefNode
+  type GitChangedFileNode,
+  type GitCommitDetail,
+  type GitCommitSummary,
+  type GitRefNode
 } from "@intelligent-git-log/contracts/gitLogModels";
 
 const graphPalette = ["#2f80ed", "#f2994a", "#27ae60", "#9b51e0", "#eb5757", "#56ccf2", "#f2c94c"];
@@ -36,7 +36,9 @@ export class GitLogViewModelMapper {
 
     const changedFiles = this.mapChangedFiles(detail.changedFiles);
     const flattened = flattenFiles(changedFiles);
-    const defaultExpandedFileIds = flattened.filter((node) => node.type === "folder").map((node) => node.id);
+    const defaultExpandedFileIds = flattened
+      .filter((node) => node.type === "folder")
+      .map((node) => node.id);
     const initialSelectedFileId = flattened.find((node) => node.type === "file")?.id ?? "";
 
     return {

@@ -1,15 +1,12 @@
-import { SelectionState } from "@intelligent-git-log/contracts/gitLogModels";
+import { type SelectionState } from "@intelligent-git-log/contracts/gitLogModels";
 import {
-  CommitDetailViewModel,
-  CommitListItemViewModel
+  type CommitDetailViewModel,
+  type CommitListItemViewModel
 } from "@intelligent-git-log/contracts/gitLogViewModels";
-import { GitLogApplicationService } from "#application/gitLogApplicationService";
+import { type GitLogApplicationService } from "#application/gitLogApplicationService";
 import { outputLogger } from "#extension/logging/outputLogger";
-import {
-  alwaysCurrentExecution,
-  MessageExecutionContext
-} from "./messageExecutionQueue";
-import { LoadingArea, WebviewMessenger } from "./webviewMessenger";
+import { alwaysCurrentExecution, type MessageExecutionContext } from "./messageExecutionQueue";
+import { type LoadingArea, type WebviewMessenger } from "./webviewMessenger";
 
 export class GitLogViewSynchronizer {
   private readonly service: GitLogApplicationService;
@@ -26,7 +23,9 @@ export class GitLogViewSynchronizer {
     this.onStateChanged = onStateChanged;
   }
 
-  public async reloadBootstrap(execution: MessageExecutionContext = alwaysCurrentExecution): Promise<void> {
+  public async reloadBootstrap(
+    execution: MessageExecutionContext = alwaysCurrentExecution
+  ): Promise<void> {
     await this.withLoading(["refs", "commits", "details"], execution, async () => {
       const bootstrap = await this.service.getBootstrapState();
       if (!execution.isCurrent()) {

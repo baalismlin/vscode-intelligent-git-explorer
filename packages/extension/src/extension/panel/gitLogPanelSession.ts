@@ -2,8 +2,8 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import { WebviewMessageRouter } from "#extension/bridge/webviewMessageRouter";
 import { outputLogger } from "#extension/logging/outputLogger";
-import { GitLogServiceFactory } from "./gitLogServiceFactory";
-import { WebviewHtmlRenderer } from "./webviewHtmlRenderer";
+import { type GitLogServiceFactory } from "./gitLogServiceFactory";
+import { type WebviewHtmlRenderer } from "./webviewHtmlRenderer";
 
 interface GitLogPanelSessionOptions {
   context: vscode.ExtensionContext;
@@ -70,15 +70,23 @@ export class GitLogPanelSession {
     this.router = new WebviewMessageRouter(
       this.panel,
       serviceSession.service,
-      () => this.serviceFactory.persistState(serviceSession.persistenceKey, serviceSession.service.getPersistedState()),
+      () =>
+        this.serviceFactory.persistState(
+          serviceSession.persistenceKey,
+          serviceSession.service.getPersistedState()
+        ),
       () => this.serviceFactory.clearPersistedState(serviceSession.persistenceKey)
     );
 
-    this.panel.onDidChangeViewState((event) => {
-      outputLogger.info(
-        `Panel view state changed. visible=${event.webviewPanel.visible} active=${event.webviewPanel.active}`
-      );
-    }, null, this.disposables);
+    this.panel.onDidChangeViewState(
+      (event) => {
+        outputLogger.info(
+          `Panel view state changed. visible=${event.webviewPanel.visible} active=${event.webviewPanel.active}`
+        );
+      },
+      null,
+      this.disposables
+    );
 
     this.initializeWebview().catch((error) => {
       const reason = error instanceof Error ? error.message : String(error);
@@ -88,8 +96,20 @@ export class GitLogPanelSession {
   }
 
   private async initializeWebview(): Promise<void> {
-    const stylePath = vscode.Uri.joinPath(this.context.extensionUri, "packages", "webview", "dist", "gitLogWebview.css");
-    const scriptPath = vscode.Uri.joinPath(this.context.extensionUri, "packages", "webview", "dist", "gitLogWebview.js");
+    const stylePath = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      "packages",
+      "webview",
+      "dist",
+      "gitLogWebview.css"
+    );
+    const scriptPath = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      "packages",
+      "webview",
+      "dist",
+      "gitLogWebview.js"
+    );
     const codiconStylePath = vscode.Uri.joinPath(
       this.context.extensionUri,
       "node_modules",
@@ -106,7 +126,10 @@ export class GitLogPanelSession {
     outputLogger.info(
       `Setting webview HTML. script=${path.basename(scriptPath.fsPath)} style=${path.basename(stylePath.fsPath)}`
     );
-    this.panel.webview.html = this.htmlRenderer.render(this.panel.webview, this.context.extensionUri);
+    this.panel.webview.html = this.htmlRenderer.render(
+      this.panel.webview,
+      this.context.extensionUri
+    );
   }
 
   private async verifyResourceExists(resource: vscode.Uri): Promise<void> {

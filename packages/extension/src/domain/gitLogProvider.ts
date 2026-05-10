@@ -1,8 +1,8 @@
 import {
-  FilterState,
-  GitCommitDetail,
-  GitCommitSummary,
-  GitRefNode
+  type FilterState,
+  type GitCommitDetail,
+  type GitCommitSummary,
+  type GitRefNode
 } from "@intelligent-git-log/contracts/gitLogModels";
 
 export interface GitLogProvider {

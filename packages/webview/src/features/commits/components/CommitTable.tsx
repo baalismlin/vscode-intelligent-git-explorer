@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CommitListItemViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
+import { type CommitListItemViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
 import { CommitGraphCell } from "./CommitGraphCell";
@@ -50,7 +50,9 @@ export function CommitTable(): JSX.Element {
         className={`commit-list-scroll ${isLoading ? "is-busy" : ""}`.trim()}
         onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
       >
-        {commits.length === 0 && <div className="empty-state">No commits for the selected reference.</div>}
+        {commits.length === 0 && (
+          <div className="empty-state">No commits for the selected reference.</div>
+        )}
         {commits.length > 0 && (
           <div className="commit-list" style={{ height: totalHeight }}>
             <div
@@ -60,7 +62,12 @@ export function CommitTable(): JSX.Element {
               }}
             >
               {visibleCommits.map((commit) => (
-                <CommitRow key={commit.id} commit={commit} selected={selectedCommitId === commit.id} disabled={isLoading} />
+                <CommitRow
+                  key={commit.id}
+                  commit={commit}
+                  selected={selectedCommitId === commit.id}
+                  disabled={isLoading}
+                />
               ))}
             </div>
           </div>

@@ -1,10 +1,10 @@
 import {
-  FilterState,
-  GitCommitDetail,
-  GitCommitSummary,
-  GitRefNode
+  type FilterState,
+  type GitCommitDetail,
+  type GitCommitSummary,
+  type GitRefNode
 } from "@intelligent-git-log/contracts/gitLogModels";
-import { GitLogProvider } from "#domain/gitLogProvider";
+import { type GitLogProvider } from "#domain/gitLogProvider";
 import { fieldSeparator, recordSeparator } from "./gitProtocol";
 import { GitCommitParser } from "./gitCommitParser";
 import { GitRefParser } from "./gitRefParser";
@@ -36,7 +36,10 @@ export class RealGitLogProvider implements GitLogProvider {
     return this.refParser.parse(refOutput, currentHead);
   }
 
-  public async getCommitSummaries(refId: string, filters: FilterState): Promise<GitCommitSummary[]> {
+  public async getCommitSummaries(
+    refId: string,
+    filters: FilterState
+  ): Promise<GitCommitSummary[]> {
     await this.ensureGitRepository();
 
     const targetRef = filters.branch.trim() || refId;

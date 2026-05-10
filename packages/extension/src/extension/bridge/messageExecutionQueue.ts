@@ -12,7 +12,10 @@ export class MessageExecutionQueue {
   private queue: Promise<void> = Promise.resolve();
   private latestMessageId = 0;
 
-  public async enqueue(messageType: string, handler: (execution: MessageExecutionContext) => Promise<void>): Promise<void> {
+  public async enqueue(
+    messageType: string,
+    handler: (execution: MessageExecutionContext) => Promise<void>
+  ): Promise<void> {
     const messageId = ++this.latestMessageId;
     const execution: MessageExecutionContext = {
       isCurrent: () => messageId === this.latestMessageId
@@ -31,7 +34,9 @@ export class MessageExecutionQueue {
         } catch (error) {
           if (!execution.isCurrent()) {
             const reason = error instanceof Error ? error.message : String(error);
-            outputLogger.info(`Ignoring stale webview message failure for ${messageType}: ${reason}`);
+            outputLogger.info(
+              `Ignoring stale webview message failure for ${messageType}: ${reason}`
+            );
             return;
           }
 

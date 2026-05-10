@@ -9,12 +9,12 @@ const distRoot = path.join(packageRoot, "dist");
 const outputs = [
   {
     directory: path.join(distRoot, "cjs"),
-    packageJson: { type: "commonjs" },
+    packageJson: { type: "commonjs" }
   },
   {
     directory: path.join(distRoot, "esm"),
-    packageJson: { type: "module" },
-  },
+    packageJson: { type: "module" }
+  }
 ];
 
 for (const output of outputs) {
@@ -22,6 +22,6 @@ for (const output of outputs) {
   await writeFile(
     path.join(output.directory, "package.json"),
     `${JSON.stringify(output.packageJson, null, 2)}\n`,
-    "utf8",
+    "utf8"
   );
 }

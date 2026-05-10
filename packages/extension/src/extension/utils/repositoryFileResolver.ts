@@ -16,7 +16,9 @@ export function resolveRepositoryFileUri(repositoryRoot: string, filePath: strin
   const resolvedPath = path.resolve(normalizedRepositoryRoot, trimmedPath);
   const relativePath = path.relative(normalizedRepositoryRoot, resolvedPath);
   const isOutsideRepository =
-    relativePath === ".." || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath);
+    relativePath === ".." ||
+    relativePath.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativePath);
 
   if (isOutsideRepository) {
     throw new Error("The selected file is outside the repository.");

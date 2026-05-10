@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { outputLogger } from "#extension/logging/outputLogger";
-import { GitLogPanelManager } from "#extension/panel/gitLogPanelManager";
+import { type GitLogPanelManager } from "#extension/panel/gitLogPanelManager";
 
 export function registerOpenGitLogCommand(
   context: vscode.ExtensionContext,

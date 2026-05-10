@@ -1,4 +1,4 @@
-import { ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
+import { type ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
 import { ChangedFilesTree } from "./ChangedFilesTree";
@@ -9,7 +9,9 @@ export function ChangedFilesPanel(): JSX.Element {
   const selectedFileId = useGitLogStore((state) => state.selectedFileId);
   const setExpandedFiles = useGitLogStore((state) => state.setExpandedFiles);
 
-  const selectedFile = selectedCommitDetail ? findFileNode(selectedCommitDetail.changedFiles, selectedFileId) : undefined;
+  const selectedFile = selectedCommitDetail
+    ? findFileNode(selectedCommitDetail.changedFiles, selectedFileId)
+    : undefined;
   const canUseSelectedFile = selectedFile?.type === "file";
 
   return (
@@ -61,7 +63,9 @@ export function ChangedFilesPanel(): JSX.Element {
         </div>
         <div className="file-tree">
           {selectedCommitDetail ? (
-            selectedCommitDetail.changedFiles.map((node) => <ChangedFilesTree key={node.id} node={node} depth={0} />)
+            selectedCommitDetail.changedFiles.map((node) => (
+              <ChangedFilesTree key={node.id} node={node} depth={0} />
+            ))
           ) : (
             <div className="empty-state">Select a commit to inspect changed files.</div>
           )}
@@ -97,7 +101,10 @@ function DetailToolButton({
   );
 }
 
-function findFileNode(nodes: ChangedFileNodeViewModel[], selectedFileId: string): ChangedFileNodeViewModel | undefined {
+function findFileNode(
+  nodes: ChangedFileNodeViewModel[],
+  selectedFileId: string
+): ChangedFileNodeViewModel | undefined {
   for (const node of nodes) {
     if (node.id === selectedFileId) {
       return node;

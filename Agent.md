@@ -3,6 +3,7 @@
 ## Stage Summary
 
 ### Architecture Refactor Stage
+
 - Status: Completed
 - Completed:
   - React + Vite + TypeScript webview app
@@ -11,6 +12,7 @@
   - Extension / bridge / webview layering
 
 ### Model Consolidation Stage
+
 - Status: Completed
 - Completed:
   - Domain models and view models
@@ -19,6 +21,7 @@
   - Application / domain / infrastructure separation
 
 ### Interaction Enhancement Stage
+
 - Status: Mostly completed
 - Completed:
   - Selection state
@@ -31,6 +34,7 @@
   - Keyboard navigation was intentionally not expanded further
 
 ### Data Integration Stage
+
 - Status: In finishing phase
 - Completed:
   - Real Git data source integration
@@ -45,6 +49,7 @@
   - `commits:cherryPick`
 
 ### Performance And Engineering Stage
+
 - Status: Started
 - Completed:
   - Virtual scrolling for the commits list

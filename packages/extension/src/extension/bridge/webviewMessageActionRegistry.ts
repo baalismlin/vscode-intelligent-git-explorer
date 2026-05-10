@@ -1,12 +1,10 @@
-import {
-  WebviewToExtensionMessage
-} from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
-import { GitLogApplicationService } from "#application/gitLogApplicationService";
+import { type WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
+import { type GitLogApplicationService } from "#application/gitLogApplicationService";
 import { outputLogger } from "#extension/logging/outputLogger";
 import { safeJson } from "#extension/utils/safeJson";
-import { GitLogViewSynchronizer } from "./gitLogViewSynchronizer";
-import { MessageExecutionContext } from "./messageExecutionQueue";
-import { WebviewMessenger } from "./webviewMessenger";
+import { type GitLogViewSynchronizer } from "./gitLogViewSynchronizer";
+import { type MessageExecutionContext } from "./messageExecutionQueue";
+import { type WebviewMessenger } from "./webviewMessenger";
 
 export type MessageSubtype = "log" | "read" | "update";
 export type WebviewMessageType = WebviewToExtensionMessage["type"];
@@ -64,7 +62,12 @@ export class WebviewMessageActionRegistry {
         outputLogger.info(`Selecting ref: ${payload.refId}`);
         await view.withLoading(["commits", "details"], execution, async () => {
           const result = await service.selectRef(payload.refId);
-          await view.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
+          await view.postSelectionPayloads(
+            result.selection,
+            result.commits,
+            result.selectedCommitDetail,
+            execution
+          );
         });
       }
     });
@@ -101,7 +104,12 @@ export class WebviewMessageActionRegistry {
         await view.withLoading(["commits", "details"], execution, async () => {
           outputLogger.info(`Updating filters: ${safeJson(payload)}`);
           const result = await service.setFilters(payload);
-          await view.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
+          await view.postSelectionPayloads(
+            result.selection,
+            result.commits,
+            result.selectedCommitDetail,
+            execution
+          );
         });
       }
     });
@@ -111,7 +119,12 @@ export class WebviewMessageActionRegistry {
         outputLogger.info("Refreshing commit list.");
         await view.withLoading(["commits", "details"], execution, async () => {
           const result = await service.refresh();
-          await view.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
+          await view.postSelectionPayloads(
+            result.selection,
+            result.commits,
+            result.selectedCommitDetail,
+            execution
+          );
         });
       }
     });
@@ -130,7 +143,9 @@ export class WebviewMessageActionRegistry {
     this.register("revertSelectedChanges", {
       subtype: "update",
       handle: async (message) => {
-        const didRevert = await service.revertSelectedChanges(payloadOf(message, "revertSelectedChanges").path);
+        const didRevert = await service.revertSelectedChanges(
+          payloadOf(message, "revertSelectedChanges").path
+        );
         if (didRevert) {
           await view.reloadBootstrap();
         }

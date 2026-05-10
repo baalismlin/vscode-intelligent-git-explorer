@@ -33,10 +33,24 @@
     "build:contracts": "pnpm --filter @intelligent-git-log/contracts build",
     "build:extension": "pnpm --filter @intelligent-git-log/extension build",
     "build:webview": "pnpm --filter @intelligent-git-log/webview build",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "watch": "pnpm --filter @intelligent-git-log/extension build --watch"
   },
   "dependencies": {
     "@intelligent-git-log/contracts": "workspace:*",
     "@vscode/codicons": "^0.0.36"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.3",
+    "typescript-eslint": "^8.59.2"
   }
 }

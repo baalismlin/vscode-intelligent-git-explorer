@@ -1,4 +1,4 @@
-import { WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
+import { type WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 
 interface VsCodeApi {
   postMessage(message: unknown): void;

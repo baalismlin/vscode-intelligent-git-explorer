@@ -1,16 +1,16 @@
 import {
-  FilterState,
-  GitRefNode,
-  GitCommitSummary,
-  SelectionState
+  type FilterState,
+  type GitRefNode,
+  type GitCommitSummary,
+  type SelectionState
 } from "@intelligent-git-log/contracts/gitLogModels";
 import {
-  CommitDetailViewModel,
-  CommitListItemViewModel,
-  GitLogBootstrapViewModel
+  type CommitDetailViewModel,
+  type CommitListItemViewModel,
+  type GitLogBootstrapViewModel
 } from "@intelligent-git-log/contracts/gitLogViewModels";
-import { GitLogProvider } from "#domain/gitLogProvider";
-import { VscodeGitActions } from "#extension/actions/vscodeGitActions";
+import { type GitLogProvider } from "#domain/gitLogProvider";
+import { type VscodeGitActions } from "#extension/actions/vscodeGitActions";
 import { GitLogViewModelMapper } from "./gitLogViewModelMapper";
 
 const defaultFilters: FilterState = {
@@ -54,7 +54,10 @@ export class GitLogApplicationService {
   public async getBootstrapState(): Promise<GitLogBootstrapViewModel> {
     const refs = await this.provider.getRefs();
     this.selection = this.normalizeSelectedRef(refs, this.selection);
-    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    const summaries = await this.provider.getCommitSummaries(
+      this.selection.selectedRefId,
+      this.filters
+    );
     this.selection = this.normalizeSelection(
       summaries,
       this.selection.selectedRefId,
@@ -94,7 +97,10 @@ export class GitLogApplicationService {
     selection: SelectionState;
     selectedCommitDetail: CommitDetailViewModel | null;
   }> {
-    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    const summaries = await this.provider.getCommitSummaries(
+      this.selection.selectedRefId,
+      this.filters
+    );
     this.selection = this.normalizeSelection(summaries, this.selection.selectedRefId, commitId);
     const detail = await this.provider.getCommitDetail(this.selection.selectedCommitId);
 
@@ -110,7 +116,10 @@ export class GitLogApplicationService {
     selection: SelectionState;
   }> {
     this.filters = filters;
-    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    const summaries = await this.provider.getCommitSummaries(
+      this.selection.selectedRefId,
+      this.filters
+    );
     this.selection = this.normalizeSelection(
       summaries,
       this.selection.selectedRefId,
@@ -130,7 +139,10 @@ export class GitLogApplicationService {
     selectedCommitDetail: CommitDetailViewModel | null;
     selection: SelectionState;
   }> {
-    const summaries = await this.provider.getCommitSummaries(this.selection.selectedRefId, this.filters);
+    const summaries = await this.provider.getCommitSummaries(
+      this.selection.selectedRefId,
+      this.filters
+    );
     this.selection = this.normalizeSelection(
       summaries,
       this.selection.selectedRefId,
@@ -169,7 +181,11 @@ export class GitLogApplicationService {
   }
 
   public async revertSelectedChanges(filePath: string): Promise<boolean> {
-    return this.actions.revertSelectedChanges(this.repositoryRoot, this.selection.selectedCommitId, filePath);
+    return this.actions.revertSelectedChanges(
+      this.repositoryRoot,
+      this.selection.selectedCommitId,
+      filePath
+    );
   }
 
   public async createBranch(): Promise<void> {
@@ -293,7 +309,10 @@ function findMatchingRefId(nodes: GitRefNode[], query: string): string | undefin
   const normalizedQuery = query.toLowerCase();
 
   for (const node of nodes) {
-    if (isSelectableRefNode(node) && (node.id.toLowerCase() === normalizedQuery || node.label.toLowerCase() === normalizedQuery)) {
+    if (
+      isSelectableRefNode(node) &&
+      (node.id.toLowerCase() === normalizedQuery || node.label.toLowerCase() === normalizedQuery)
+    ) {
       return node.id;
     }
 

@@ -1,7 +1,14 @@
 import { create } from "zustand";
-import { FilterState, GitRefNode, SelectionState } from "@intelligent-git-log/contracts/gitLogModels";
-import { CommitDetailViewModel, CommitListItemViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
-import { GitLogBootstrapViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
+import {
+  type FilterState,
+  type GitRefNode,
+  type SelectionState
+} from "@intelligent-git-log/contracts/gitLogModels";
+import {
+  type CommitDetailViewModel,
+  type CommitListItemViewModel
+} from "@intelligent-git-log/contracts/gitLogViewModels";
+import { type GitLogBootstrapViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 
 export type FocusedPane = "refs" | "commits" | "files";
 
@@ -111,11 +118,11 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
       filters: payload.filters,
       expandedRefs: persistedUiState?.expandedRefs ?? get().expandedRefs,
       expandedFiles: shouldReuseFileState
-        ? persistedUiState?.expandedFiles ?? []
-        : selectedCommitDetail?.defaultExpandedFileIds ?? [],
+        ? (persistedUiState?.expandedFiles ?? [])
+        : (selectedCommitDetail?.defaultExpandedFileIds ?? []),
       selectedFileId: shouldReuseFileState
-        ? persistedUiState?.selectedFileId ?? ""
-        : selectedCommitDetail?.initialSelectedFileId ?? "",
+        ? (persistedUiState?.selectedFileId ?? "")
+        : (selectedCommitDetail?.initialSelectedFileId ?? ""),
       panelLayout: persistedUiState?.panelLayout ?? get().panelLayout,
       focusedPane: persistedUiState?.focusedPane ?? get().focusedPane,
       errorMessage: ""
@@ -127,7 +134,9 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
     set({
       commits,
       selectedCommitDetail:
-        get().selectedCommitDetail?.commitId === selectedCommitId ? get().selectedCommitDetail : null
+        get().selectedCommitDetail?.commitId === selectedCommitId
+          ? get().selectedCommitDetail
+          : null
     });
   },
   setCommitDetails: (_commitId, detail) => {
@@ -139,11 +148,11 @@ export const useGitLogStore = create<GitLogStoreState>((set, get) => ({
     set({
       selectedCommitDetail: detail,
       expandedFiles: shouldReuseFileState
-        ? persistedUiState?.expandedFiles ?? []
-        : detail?.defaultExpandedFileIds ?? [],
+        ? (persistedUiState?.expandedFiles ?? [])
+        : (detail?.defaultExpandedFileIds ?? []),
       selectedFileId: shouldReuseFileState
-        ? persistedUiState?.selectedFileId ?? ""
-        : detail?.initialSelectedFileId ?? ""
+        ? (persistedUiState?.selectedFileId ?? "")
+        : (detail?.initialSelectedFileId ?? "")
     });
   },
   setSelection: (selection) => set({ selection }),

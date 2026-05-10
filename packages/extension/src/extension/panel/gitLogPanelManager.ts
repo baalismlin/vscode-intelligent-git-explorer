@@ -19,19 +19,14 @@ export class GitLogPanelManager implements vscode.Disposable {
     }
 
     outputLogger.info("Creating new Git Log panel.");
-    const panel = vscode.window.createWebviewPanel(
-      viewType,
-      "Intelligent Git Log",
-      column,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        localResourceRoots: [
-          vscode.Uri.joinPath(context.extensionUri, "packages", "webview", "dist"),
-          vscode.Uri.joinPath(context.extensionUri, "node_modules", "@vscode", "codicons", "dist")
-        ]
-      }
-    );
+    const panel = vscode.window.createWebviewPanel(viewType, "Intelligent Git Log", column, {
+      enableScripts: true,
+      retainContextWhenHidden: true,
+      localResourceRoots: [
+        vscode.Uri.joinPath(context.extensionUri, "packages", "webview", "dist"),
+        vscode.Uri.joinPath(context.extensionUri, "node_modules", "@vscode", "codicons", "dist")
+      ]
+    });
 
     this.currentSession = new GitLogPanelSession({
       context,

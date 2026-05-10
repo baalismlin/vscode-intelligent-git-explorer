@@ -1,5 +1,8 @@
-import * as vscode from "vscode";
-import { GitLogApplicationService, PersistedGitLogState } from "#application/gitLogApplicationService";
+import type * as vscode from "vscode";
+import {
+  GitLogApplicationService,
+  type PersistedGitLogState
+} from "#application/gitLogApplicationService";
 import { RealGitLogProvider } from "#infrastructure/git/realGitLogProvider";
 import { VscodeGitActions } from "#extension/actions/vscodeGitActions";
 

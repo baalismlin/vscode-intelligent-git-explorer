@@ -15,7 +15,10 @@ interface GitApi {
 interface GitRepository {
   getCommit(ref: string): Promise<{ hash: string }>;
   diffBetweenPatch(ref1: string, ref2: string, path?: string): Promise<string>;
-  apply(patch: string, options?: { allowEmpty?: boolean; reverse?: boolean; threeWay?: boolean }): Promise<void>;
+  apply(
+    patch: string,
+    options?: { allowEmpty?: boolean; reverse?: boolean; threeWay?: boolean }
+  ): Promise<void>;
 }
 
 export class VscodeGitActions {
@@ -25,7 +28,11 @@ export class VscodeGitActions {
     await vscode.commands.executeCommand("vscode.open", fileUri);
   }
 
-  public async openDiff(repositoryRoot: string, selectedCommitId: string, filePath: string): Promise<void> {
+  public async openDiff(
+    repositoryRoot: string,
+    selectedCommitId: string,
+    filePath: string
+  ): Promise<void> {
     if (!selectedCommitId) {
       throw new Error("No commit is selected.");
     }
@@ -103,6 +110,8 @@ export class VscodeGitActions {
       throw new Error("VS Code Git extension is not available.");
     }
 
-    return gitExtension.isActive ? gitExtension.exports.getAPI(1) : (await gitExtension.activate()).getAPI(1);
+    return gitExtension.isActive
+      ? gitExtension.exports.getAPI(1)
+      : (await gitExtension.activate()).getAPI(1);
   }
 }

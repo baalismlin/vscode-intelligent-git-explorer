@@ -1,10 +1,4 @@
-export type GitRefType =
-  | "head"
-  | "group"
-  | "localBranch"
-  | "remote"
-  | "remoteBranch"
-  | "tag";
+export type GitRefType = "head" | "group" | "localBranch" | "remote" | "remoteBranch" | "tag";
 
 export interface GitRefNode {
   id: string;

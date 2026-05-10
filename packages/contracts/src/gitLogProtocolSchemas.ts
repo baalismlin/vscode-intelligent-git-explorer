@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { FilterState, GitRefNode, WorkspaceState } from "./gitLogModels";
+import { type FilterState, type GitRefNode, type WorkspaceState } from "./gitLogModels";
 import {
-  ChangedFileNodeViewModel,
-  CommitDetailViewModel,
-  CommitGraphViewModel,
-  CommitListItemViewModel,
-  GitLogBootstrapViewModel
+  type ChangedFileNodeViewModel,
+  type CommitDetailViewModel,
+  type CommitGraphViewModel,
+  type CommitListItemViewModel,
+  type GitLogBootstrapViewModel
 } from "./gitLogViewModels";
 
 export const changedFileStatusSchema = z.enum(["M", "A", "D", "R"]);

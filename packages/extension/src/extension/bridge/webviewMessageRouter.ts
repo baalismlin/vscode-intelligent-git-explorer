@@ -1,14 +1,11 @@
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import { webviewToExtensionMessageSchema } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
-import { GitLogApplicationService } from "#application/gitLogApplicationService";
+import { type GitLogApplicationService } from "#application/gitLogApplicationService";
 import { GitReferenceUnavailableError } from "#domain/gitLogErrors";
 import { outputLogger } from "#extension/logging/outputLogger";
 import { safeJson } from "#extension/utils/safeJson";
 import { GitLogMessageController } from "./gitLogMessageController";
-import {
-  alwaysCurrentExecution,
-  MessageExecutionQueue
-} from "./messageExecutionQueue";
+import { alwaysCurrentExecution, MessageExecutionQueue } from "./messageExecutionQueue";
 import { WebviewMessenger } from "./webviewMessenger";
 
 export class WebviewMessageRouter {
@@ -41,7 +38,7 @@ export class WebviewMessageRouter {
     }
   }
 
-  private async handleReceiveMessage(rawMessage: any): Promise<void> {
+  private async handleReceiveMessage(rawMessage: unknown): Promise<void> {
     outputLogger.info(`Message received from webview: ${safeJson(rawMessage)}`);
     const result = webviewToExtensionMessageSchema.safeParse(rawMessage);
     if (!result.success) {
@@ -51,7 +48,9 @@ export class WebviewMessageRouter {
     }
 
     try {
-      await this.queue.enqueue(result.data.type, (execution) => this.controller.handleMessage(result.data, execution));
+      await this.queue.enqueue(result.data.type, (execution) =>
+        this.controller.handleMessage(result.data, execution)
+      );
     } catch (error) {
       await this.handleMessageError(result.data.type, error);
     }

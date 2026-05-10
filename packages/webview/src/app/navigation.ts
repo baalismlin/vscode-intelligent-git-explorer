@@ -1,5 +1,5 @@
-import { GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
-import { ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
+import { type GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
+import { type ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 
 export interface VisibleRefItem {
   id: string;
@@ -39,7 +39,10 @@ export function getVisibleRefs(nodes: GitRefNode[], expandedIds: string[]): Visi
   return visible;
 }
 
-export function getVisibleFiles(nodes: ChangedFileNodeViewModel[], expandedIds: string[]): VisibleFileItem[] {
+export function getVisibleFiles(
+  nodes: ChangedFileNodeViewModel[],
+  expandedIds: string[]
+): VisibleFileItem[] {
   const visible: VisibleFileItem[] = [];
 
   const walk = (items: ChangedFileNodeViewModel[]) => {

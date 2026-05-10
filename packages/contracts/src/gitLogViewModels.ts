@@ -1,9 +1,9 @@
 import {
-  ChangedFileStatus,
-  FilterState,
-  GitRefNode,
-  SelectionState,
-  WorkspaceState
+  type ChangedFileStatus,
+  type FilterState,
+  type GitRefNode,
+  type SelectionState,
+  type WorkspaceState
 } from "./gitLogModels";
 
 export interface CommitGraphViewModel {

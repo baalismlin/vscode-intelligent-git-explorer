@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect } from "react";
+import { type ChangeEvent, useEffect } from "react";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
 
@@ -30,17 +30,18 @@ export function CommitToolbar(): JSX.Element {
     });
   }, [filters, setFilters]);
 
-  const updateFilter = (key: keyof typeof filters) => (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const nextFilters = {
-      ...filters,
-      [key]: event.target.value
+  const updateFilter =
+    (key: keyof typeof filters) => (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const nextFilters = {
+        ...filters,
+        [key]: event.target.value
+      };
+      setFilters(nextFilters);
+      postMessageToHost({
+        type: "setFilters",
+        payload: nextFilters
+      });
     };
-    setFilters(nextFilters);
-    postMessageToHost({
-      type: "setFilters",
-      payload: nextFilters
-    });
-  };
 
   const openUserFilterPrompt = () => {
     const nextUserFilter = window.prompt("Enter one or more authors separated by |", filters.user);
@@ -77,7 +78,11 @@ export function CommitToolbar(): JSX.Element {
         >
           {filters.user || "User"}
         </button>
-        <select className={getFilterClassName(filters.date)} value={filters.date} onChange={updateFilter("date")}>
+        <select
+          className={getFilterClassName(filters.date)}
+          value={filters.date}
+          onChange={updateFilter("date")}
+        >
           <option value="">Date</option>
           {DATE_FILTER_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -125,7 +130,13 @@ function CommitToolButton({
   onClick: () => void;
 }): JSX.Element {
   return (
-    <button type="button" className="commit-tool-button" title={label} aria-label={label} onClick={onClick}>
+    <button
+      type="button"
+      className="commit-tool-button"
+      title={label}
+      aria-label={label}
+      onClick={onClick}
+    >
       <span className={iconClassName} aria-hidden="true" />
     </button>
   );

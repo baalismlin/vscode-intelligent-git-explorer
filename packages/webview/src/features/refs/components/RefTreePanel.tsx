@@ -1,6 +1,6 @@
 import { useDeferredValue, useMemo, useRef, useState } from "react";
-import { GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
-import { WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
+import { type GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
+import { type WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 import { isSelectableRef } from "@app/navigation";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
@@ -144,18 +144,18 @@ export function RefTreePanel(): JSX.Element {
         <div className="reference-tree-pane">
           <div className="reference-tree-content">
             <div className="tree">
-            {visibleRefs.length > 0 ? (
-              visibleRefs.map((node) => (
-                <RefTreeNode
-                  key={node.id}
-                  node={node}
-                  depth={0}
-                  forceExpanded={Boolean(deferredSearchQuery)}
-                />
-              ))
-            ) : (
-              <div className="reference-empty-state">No references match the current filter.</div>
-            )}
+              {visibleRefs.length > 0 ? (
+                visibleRefs.map((node) => (
+                  <RefTreeNode
+                    key={node.id}
+                    node={node}
+                    depth={0}
+                    forceExpanded={Boolean(deferredSearchQuery)}
+                  />
+                ))
+              ) : (
+                <div className="reference-empty-state">No references match the current filter.</div>
+              )}
             </div>
           </div>
         </div>
@@ -178,11 +178,12 @@ function RefTreeNode({
   const toggleRefExpanded = useGitLogStore((state) => state.toggleRefExpanded);
 
   const hasHeadChildBranch = node.type === "head" && node.children?.length === 1;
-  const headChildRefId = hasHeadChildBranch ? node.children?.[0]?.id ?? "" : "";
-  const headBranchName = hasHeadChildBranch ? node.children?.[0]?.label ?? "" : "";
+  const headChildRefId = hasHeadChildBranch ? (node.children?.[0]?.id ?? "") : "";
+  const headBranchName = hasHeadChildBranch ? (node.children?.[0]?.label ?? "") : "";
   const hasChildren = Boolean(node.children?.length) && !hasHeadChildBranch;
   const isExpanded = forceExpanded || expandedRefs.includes(node.id);
-  const isSelected = selectedRefId === node.id || (hasHeadChildBranch && selectedRefId === headChildRefId);
+  const isSelected =
+    selectedRefId === node.id || (hasHeadChildBranch && selectedRefId === headChildRefId);
   const isSelectable = isSelectableRef(node.type) || hasHeadChildBranch;
 
   return (
@@ -236,7 +237,12 @@ function RefTreeNode({
       </div>
       {hasChildren && isExpanded
         ? node.children?.map((child) => (
-            <RefTreeNode key={child.id} node={child} depth={depth + 1} forceExpanded={forceExpanded} />
+            <RefTreeNode
+              key={child.id}
+              node={child}
+              depth={depth + 1}
+              forceExpanded={forceExpanded}
+            />
           ))
         : null}
     </div>
@@ -276,7 +282,11 @@ function runRefCommand(type: RefCommandMessageType): void {
 
 type RefCommandMessageType = Extract<
   WebviewToExtensionMessage["type"],
-  "refs:newBranch" | "refs:updateSelected" | "refs:deleteSelected" | "refs:compareWithCurrent" | "refs:fetch"
+  | "refs:newBranch"
+  | "refs:updateSelected"
+  | "refs:deleteSelected"
+  | "refs:compareWithCurrent"
+  | "refs:fetch"
 >;
 
 function flattenDirectoryGroups(nodes: GitRefNode[]): GitRefNode[] {
@@ -287,7 +297,9 @@ function flattenDirectoryGroupNode(node: GitRefNode, prefix: string, depth: numb
   const nextPrefix = prefix ? `${prefix}/${node.label}` : node.label;
 
   if (node.type === "group" && shouldFlattenGroup(node, depth)) {
-    return (node.children ?? []).flatMap((child) => flattenDirectoryGroupNode(child, nextPrefix, depth + 1));
+    return (node.children ?? []).flatMap((child) =>
+      flattenDirectoryGroupNode(child, nextPrefix, depth + 1)
+    );
   }
 
   if (!node.children?.length) {
@@ -312,7 +324,9 @@ function shouldFlattenGroup(node: GitRefNode, depth: number): boolean {
     return false;
   }
 
-  return depth > 0 && node.id !== "local-group" && node.id !== "remote-group" && node.id !== "tags-group";
+  return (
+    depth > 0 && node.id !== "local-group" && node.id !== "remote-group" && node.id !== "tags-group"
+  );
 }
 
 function filterRefs(nodes: GitRefNode[], query: string): GitRefNode[] {

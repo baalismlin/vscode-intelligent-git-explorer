@@ -1,15 +1,13 @@
-import {
-  WebviewToExtensionMessage
-} from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
-import { GitLogApplicationService } from "#application/gitLogApplicationService";
+import { type WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
+import { type GitLogApplicationService } from "#application/gitLogApplicationService";
 import { outputLogger } from "#extension/logging/outputLogger";
 import { GitLogViewSynchronizer } from "./gitLogViewSynchronizer";
-import { MessageExecutionContext } from "./messageExecutionQueue";
+import { type MessageExecutionContext } from "./messageExecutionQueue";
 import {
-  WebviewMessageAction,
+  type WebviewMessageAction,
   WebviewMessageActionRegistry
 } from "./webviewMessageActionRegistry";
-import { WebviewMessenger } from "./webviewMessenger";
+import { type WebviewMessenger } from "./webviewMessenger";
 
 export class GitLogMessageController {
   private readonly messenger: WebviewMessenger;

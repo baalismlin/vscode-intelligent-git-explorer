@@ -7,7 +7,7 @@ import { CommitTable } from "@features/commits/components/CommitTable";
 import { ChangedFilesPanel } from "@features/files/components/ChangedFilesPanel";
 import { RefTreePanel } from "@features/refs/components/RefTreePanel";
 import { ResizableSplitLayout } from "@shared/components/ResizableSplitLayout";
-import { FocusedPane, PersistedWebviewState, useGitLogStore } from "@store/gitLogStore";
+import { type FocusedPane, type PersistedWebviewState, useGitLogStore } from "@store/gitLogStore";
 
 export function App(): JSX.Element {
   const errorMessage = useGitLogStore((state) => state.errorMessage);

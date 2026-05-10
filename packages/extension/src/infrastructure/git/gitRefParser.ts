@@ -1,4 +1,4 @@
-import { GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
+import { type GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
 import { fieldSeparator, splitLines } from "./gitProtocol";
 
 export class GitRefParser {
@@ -232,7 +232,10 @@ function stripTimestamp(node: TimedTreeNode): GitRefNode {
     id: node.id,
     label: node.label,
     type: node.type,
-    children: children && children.length > 0 ? children.map((child) => stripTimestamp(child as TimedTreeNode)) : undefined
+    children:
+      children && children.length > 0
+        ? children.map((child) => stripTimestamp(child as TimedTreeNode))
+        : undefined
   };
 }
 

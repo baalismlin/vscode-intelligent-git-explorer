@@ -1,6 +1,6 @@
 import {
-  ChangedFileStatus,
-  GitChangedFileNode
+  type ChangedFileStatus,
+  type GitChangedFileNode
 } from "@intelligent-git-log/contracts/gitLogModels";
 
 export class ChangedFilesTreeBuilder {
@@ -29,7 +29,11 @@ export class ChangedFilesTreeBuilder {
   }
 }
 
-function insertPath(nodes: Map<string, MutableTreeNode>, filePath: string, status: ChangedFileStatus): void {
+function insertPath(
+  nodes: Map<string, MutableTreeNode>,
+  filePath: string,
+  status: ChangedFileStatus
+): void {
   const segments = filePath.split("/").filter(Boolean);
   let currentNodes = nodes;
   let currentPath = "";

@@ -6,7 +6,14 @@ export class WebviewHtmlRenderer {
       vscode.Uri.joinPath(extensionUri, "packages", "webview", "dist", "gitLogWebview.css")
     );
     const codiconStyleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(extensionUri, "node_modules", "@vscode", "codicons", "dist", "codicon.css")
+      vscode.Uri.joinPath(
+        extensionUri,
+        "node_modules",
+        "@vscode",
+        "codicons",
+        "dist",
+        "codicon.css"
+      )
     );
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(extensionUri, "packages", "webview", "dist", "gitLogWebview.js")

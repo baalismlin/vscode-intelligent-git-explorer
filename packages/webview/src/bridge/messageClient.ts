@@ -1,6 +1,6 @@
 import {
   extensionToWebviewMessageSchema,
-  ExtensionToWebviewMessage
+  type ExtensionToWebviewMessage
 } from "@intelligent-git-log/contracts/extensionToWebviewProtocol";
 import { useGitLogStore } from "@store/gitLogStore";
 

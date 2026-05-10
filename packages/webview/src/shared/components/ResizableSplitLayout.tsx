@@ -1,5 +1,12 @@
-import { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode, useEffect, useMemo, useRef } from "react";
-import { PersistedWebviewState } from "@store/gitLogStore";
+import {
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef
+} from "react";
+import { type PersistedWebviewState } from "@store/gitLogStore";
 
 type PanelLayoutState = PersistedWebviewState["panelLayout"];
 
@@ -125,8 +132,19 @@ export function ResizableSplitLayout({
   );
 }
 
-function ResizeHandle({ onMouseDown }: { onMouseDown: (event: ReactMouseEvent<HTMLDivElement>) => void }): JSX.Element {
-  return <div className="resize-handle" onMouseDown={onMouseDown} role="separator" aria-orientation="vertical" />;
+function ResizeHandle({
+  onMouseDown
+}: {
+  onMouseDown: (event: ReactMouseEvent<HTMLDivElement>) => void;
+}): JSX.Element {
+  return (
+    <div
+      className="resize-handle"
+      onMouseDown={onMouseDown}
+      role="separator"
+      aria-orientation="vertical"
+    />
+  );
 }
 
 function clamp(value: number, min: number, max: number): number {

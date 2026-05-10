@@ -1,7 +1,7 @@
-import * as vscode from "vscode";
+import type * as vscode from "vscode";
 import {
   extensionToWebviewMessageSchema,
-  ExtensionToWebviewMessage
+  type ExtensionToWebviewMessage
 } from "@intelligent-git-log/contracts/extensionToWebviewProtocol";
 import { outputLogger } from "#extension/logging/outputLogger";
 
