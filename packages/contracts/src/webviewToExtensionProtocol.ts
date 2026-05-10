@@ -1,16 +1,6 @@
 import { z } from "zod";
 import { filterStateSchema } from "./gitLogProtocolSchemas";
 
-export const webviewCommandSchema = z.enum([
-  "refs:newBranch",
-  "refs:fetch",
-  "refs:updateSelected",
-  "refs:deleteSelected",
-  "refs:compareWithCurrent",
-  "commits:goToRef",
-  "commits:cherryPick"
-]);
-
 export const webviewToExtensionMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("ready")
@@ -60,12 +50,26 @@ export const webviewToExtensionMessageSchema = z.discriminatedUnion("type", [
     })
   }),
   z.object({
-    type: z.literal("runCommand"),
-    payload: z.object({
-      command: webviewCommandSchema
-    })
+    type: z.literal("refs:newBranch")
+  }),
+  z.object({
+    type: z.literal("refs:fetch")
+  }),
+  z.object({
+    type: z.literal("refs:updateSelected")
+  }),
+  z.object({
+    type: z.literal("refs:deleteSelected")
+  }),
+  z.object({
+    type: z.literal("refs:compareWithCurrent")
+  }),
+  z.object({
+    type: z.literal("commits:goToRef")
+  }),
+  z.object({
+    type: z.literal("commits:cherryPick")
   })
 ]);
 
-export type WebviewCommand = z.infer<typeof webviewCommandSchema>;
 export type WebviewToExtensionMessage = z.infer<typeof webviewToExtensionMessageSchema>;

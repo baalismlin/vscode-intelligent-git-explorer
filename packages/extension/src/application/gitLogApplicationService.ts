@@ -10,6 +10,7 @@ import {
   GitLogBootstrapViewModel
 } from "@intelligent-git-log/contracts/gitLogViewModels";
 import { GitLogProvider } from "#domain/gitLogProvider";
+import { VscodeGitActions } from "#extension/actions/vscodeGitActions";
 import { GitLogViewModelMapper } from "./gitLogViewModelMapper";
 
 const defaultFilters: FilterState = {
@@ -27,6 +28,7 @@ export interface PersistedGitLogState {
 
 export class GitLogApplicationService {
   private readonly provider: GitLogProvider;
+  private readonly actions: VscodeGitActions;
   private readonly repositoryRoot: string;
   private readonly mapper: GitLogViewModelMapper;
   private selection: SelectionState = {
@@ -37,10 +39,12 @@ export class GitLogApplicationService {
 
   public constructor(
     provider: GitLogProvider,
+    actions: VscodeGitActions,
     repositoryRoot: string,
     persistedState?: Partial<PersistedGitLogState>
   ) {
     this.provider = provider;
+    this.actions = actions;
     this.repositoryRoot = repositoryRoot;
     this.mapper = new GitLogViewModelMapper();
     this.selection = persistedState?.selection ?? this.selection;
@@ -154,6 +158,30 @@ export class GitLogApplicationService {
 
   public getRepositoryRoot(): string {
     return this.repositoryRoot;
+  }
+
+  public async openFile(filePath: string): Promise<void> {
+    await this.actions.openFile(this.repositoryRoot, filePath);
+  }
+
+  public async openDiff(filePath: string): Promise<void> {
+    await this.actions.openDiff(this.repositoryRoot, this.selection.selectedCommitId, filePath);
+  }
+
+  public async revertSelectedChanges(filePath: string): Promise<boolean> {
+    return this.actions.revertSelectedChanges(this.repositoryRoot, this.selection.selectedCommitId, filePath);
+  }
+
+  public async createBranch(): Promise<void> {
+    await this.actions.createBranch();
+  }
+
+  public async fetch(): Promise<void> {
+    await this.actions.fetch();
+  }
+
+  public async promptForRefQuery(): Promise<string | undefined> {
+    return this.actions.promptForRefQuery();
   }
 
   public async navigateToRefOrHash(query: string): Promise<{

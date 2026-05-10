@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "node:path";
 import { GitLogApplicationService, PersistedGitLogState } from "#application/gitLogApplicationService";
 import { RealGitLogProvider } from "#infrastructure/git/realGitLogProvider";
+import { VscodeGitActions } from "#extension/actions/vscodeGitActions";
 import { WebviewMessageRouter } from "#extension/bridge/webviewMessageRouter";
 import { outputLogger } from "#extension/logging/outputLogger";
 
@@ -64,7 +65,12 @@ export class GitLogPanel {
     outputLogger.info(`Using workspace root: ${workspaceFolder}`);
     this.persistenceKey = getPersistenceKey(workspaceFolder);
     const persistedState = context.workspaceState.get<PersistedGitLogState>(this.persistenceKey);
-    const service = new GitLogApplicationService(new RealGitLogProvider(workspaceFolder), workspaceFolder, persistedState);
+    const service = new GitLogApplicationService(
+      new RealGitLogProvider(workspaceFolder),
+      new VscodeGitActions(),
+      workspaceFolder,
+      persistedState
+    );
     this.router = new WebviewMessageRouter(
       panel,
       service,

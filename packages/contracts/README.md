@@ -24,7 +24,7 @@
 
 - `src/webviewToExtensionProtocol.ts`
   - Messages posted from the webview to the extension host.
-  - `runCommand.command` is intentionally a typed enum union (`WebviewCommand`) rather than a raw string.
+  - User actions are represented as first-class message types, including command-like actions such as `refs:fetch`.
 
 ## Schema And Type Rules
 

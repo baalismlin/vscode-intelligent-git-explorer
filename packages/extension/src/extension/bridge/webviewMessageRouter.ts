@@ -1,54 +1,23 @@
 import * as vscode from "vscode";
-import * as path from "node:path";
-import { SelectionState } from "@intelligent-git-log/contracts/gitLogModels";
-import {
-  CommitDetailViewModel,
-  CommitListItemViewModel
-} from "@intelligent-git-log/contracts/gitLogViewModels";
-import {
-  extensionToWebviewMessageSchema,
-  ExtensionToWebviewMessage
-} from "@intelligent-git-log/contracts/extensionToWebviewProtocol";
-import {
-  WebviewCommand,
-  WebviewToExtensionMessage,
-  webviewToExtensionMessageSchema
-} from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
-import { GitReferenceUnavailableError } from "#domain/gitLogErrors";
+import { webviewToExtensionMessageSchema } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 import { GitLogApplicationService } from "#application/gitLogApplicationService";
+import { GitReferenceUnavailableError } from "#domain/gitLogErrors";
 import { outputLogger } from "#extension/logging/outputLogger";
-
-interface GitExtension {
-  getAPI(version: 1): GitApi;
-}
-
-interface GitApi {
-  toGitUri(uri: vscode.Uri, ref: string): vscode.Uri;
-  getRepository(uri: vscode.Uri): GitRepository | null;
-}
-
-interface GitRepository {
-  getCommit(ref: string): Promise<{ hash: string }>;
-  diffBetweenPatch(ref1: string, ref2: string, path?: string): Promise<string>;
-  apply(patch: string, options?: { allowEmpty?: boolean; reverse?: boolean; threeWay?: boolean }): Promise<void>;
-}
-
-interface MessageExecutionContext {
-  isCurrent(): boolean;
-}
-
-const alwaysCurrentExecution: MessageExecutionContext = {
-  isCurrent: () => true
-};
+import { safeJson } from "#extension/utils/safeJson";
+import { GitLogMessageController } from "./gitLogMessageController";
+import {
+  alwaysCurrentExecution,
+  MessageExecutionQueue
+} from "./messageExecutionQueue";
+import { WebviewMessenger } from "./webviewMessenger";
 
 export class WebviewMessageRouter {
-  private readonly panel: vscode.WebviewPanel;
   private readonly service: GitLogApplicationService;
-  private readonly onStateChanged?: () => void;
   private readonly onStateCleared?: () => PromiseLike<void> | void;
+  private readonly messenger: WebviewMessenger;
+  private readonly controller: GitLogMessageController;
+  private readonly queue = new MessageExecutionQueue();
   private readonly disposables: vscode.Disposable[] = [];
-  private stateChangeQueue: Promise<void> = Promise.resolve();
-  private latestStateChangeId = 0;
 
   public constructor(
     panel: vscode.WebviewPanel,
@@ -56,53 +25,25 @@ export class WebviewMessageRouter {
     onStateChanged?: () => void,
     onStateCleared?: () => PromiseLike<void> | void
   ) {
-    this.panel = panel;
     this.service = service;
-    this.onStateChanged = onStateChanged;
     this.onStateCleared = onStateCleared;
+    this.messenger = new WebviewMessenger(panel.webview);
+    this.controller = new GitLogMessageController(service, this.messenger, onStateChanged);
 
     this.disposables.push(
-      this.panel.webview.onDidReceiveMessage(async (rawMessage) => {
+      panel.webview.onDidReceiveMessage(async (rawMessage) => {
         outputLogger.info(`Message received from webview: ${safeJson(rawMessage)}`);
         const result = webviewToExtensionMessageSchema.safeParse(rawMessage);
         if (!result.success) {
           outputLogger.error(`Invalid message from webview: ${result.error.message}`);
-          void this.postMessage({
-            type: "errorOccurred",
-            payload: { message: "Invalid message from webview." }
-          });
+          void this.messenger.postError("Invalid message from webview.");
           return;
         }
 
         try {
-          await this.enqueueMessage(result.data);
+          await this.queue.enqueue(result.data.type, (execution) => this.controller.handleMessage(result.data, execution));
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          if (result.data.type === "ready" && error instanceof GitReferenceUnavailableError) {
-            outputLogger.warn(`Clearing persisted state after bootstrap failure: ${message}`);
-            this.service.resetPersistedState();
-            await this.onStateCleared?.();
-            await this.handleMessage(result.data, alwaysCurrentExecution);
-            return;
-          }
-
-          outputLogger.error(`Failed to handle message ${result.data.type}: ${message}`);
-          await this.postMessage({
-            type: "loadingStateChanged",
-            payload: { area: "refs", isLoading: false }
-          });
-          await this.postMessage({
-            type: "loadingStateChanged",
-            payload: { area: "commits", isLoading: false }
-          });
-          await this.postMessage({
-            type: "loadingStateChanged",
-            payload: { area: "details", isLoading: false }
-          });
-          await this.postMessage({
-            type: "errorOccurred",
-            payload: { message }
-          });
+          await this.handleMessageError(result.data.type, error);
         }
       })
     );
@@ -114,380 +55,18 @@ export class WebviewMessageRouter {
     }
   }
 
-  private async enqueueMessage(message: WebviewToExtensionMessage): Promise<void> {
-    const stateChangeId = ++this.latestStateChangeId;
-    const execution: MessageExecutionContext = {
-      isCurrent: () => stateChangeId === this.latestStateChangeId
-    };
-
-    const current = this.stateChangeQueue
-      .catch(() => undefined)
-      .then(async () => {
-        if (!execution.isCurrent()) {
-          outputLogger.info(`Skipping stale webview message before execution: ${message.type}`);
-          return;
-        }
-
-        try {
-          await this.handleMessage(message, execution);
-        } catch (error) {
-          if (!execution.isCurrent()) {
-            const reason = error instanceof Error ? error.message : String(error);
-            outputLogger.info(`Ignoring stale webview message failure for ${message.type}: ${reason}`);
-            return;
-          }
-
-          throw error;
-        }
-      });
-
-    this.stateChangeQueue = current.catch(() => undefined);
-    await current;
-  }
-
-  private async handleMessage(message: WebviewToExtensionMessage, execution: MessageExecutionContext): Promise<void> {
-    switch (message.type) {
-      case "log": {
-        const line = `Webview ${message.payload.level}: ${message.payload.message}`;
-        if (message.payload.level === "error") {
-          outputLogger.error(line);
-        } else if (message.payload.level === "warn") {
-          outputLogger.warn(line);
-        } else {
-          outputLogger.info(line);
-        }
-        return;
-      }
-      case "ready": {
-        outputLogger.info("Handling webview ready event.");
-        await this.withLoading(["refs", "commits", "details"], execution, async () => {
-          const bootstrap = await this.service.getBootstrapState();
-          if (!execution.isCurrent()) {
-            outputLogger.info("Skipping stale bootstrap payload.");
-            return;
-          }
-          await this.postMessage({
-            type: "bootstrap",
-            payload: bootstrap
-          });
-        });
-        return;
-      }
-      case "selectRef": {
-        outputLogger.info(`Selecting ref: ${message.payload.refId}`);
-        await this.withLoading(["commits", "details"], execution, async () => {
-          const result = await this.service.selectRef(message.payload.refId);
-          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
-        });
-        return;
-      }
-      case "selectCommit": {
-        outputLogger.info(`Selecting commit: ${message.payload.commitId}`);
-        await this.withLoading(["details"], execution, async () => {
-          const result = await this.service.selectCommit(message.payload.commitId);
-          if (!execution.isCurrent()) {
-            outputLogger.info("Skipping stale selected commit payload.");
-            return;
-          }
-          await this.postMessage({
-            type: "selectionUpdated",
-            payload: result.selection
-          });
-          await this.postMessage({
-            type: "commitDetailsUpdated",
-            payload: {
-              commitId: result.selection.selectedCommitId,
-              detail: result.selectedCommitDetail
-            }
-          });
-          this.onStateChanged?.();
-        });
-        return;
-      }
-      case "setFilters": {
-        outputLogger.info(`Updating filters: ${safeJson(message.payload)}`);
-        await this.withLoading(["commits", "details"], execution, async () => {
-          const result = await this.service.setFilters(message.payload);
-          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
-        });
-        return;
-      }
-      case "refresh": {
-        outputLogger.info("Refreshing commit list.");
-        await this.withLoading(["commits", "details"], execution, async () => {
-          const result = await this.service.refresh();
-          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
-        });
-        return;
-      }
-      case "openFile":
-        await this.handleOpenFile(message.payload.path);
-        return;
-      case "openDiff":
-        await this.handleOpenDiff(message.payload.path);
-        return;
-      case "revertSelectedChanges":
-        await this.handleRevertSelectedChanges(message.payload.path);
-        return;
-      case "runCommand":
-        await this.handleRunCommand(message.payload.command, execution);
-        return;
-      default:
-        return;
-    }
-  }
-
-  private async handleOpenFile(filePath: string): Promise<void> {
-    const fileUri = this.resolveWorkspaceFileUri(filePath);
-    outputLogger.info(`Opening file: ${fileUri.fsPath}`);
-    await vscode.commands.executeCommand("vscode.open", fileUri);
-  }
-
-  private async handleOpenDiff(filePath: string): Promise<void> {
-    const selectedCommitId = this.service.getSelection().selectedCommitId;
-    if (!selectedCommitId) {
-      await this.postMessage({
-        type: "errorOccurred",
-        payload: { message: "No commit is selected." }
-      });
+  private async handleMessageError(messageType: string, error: unknown): Promise<void> {
+    const message = error instanceof Error ? error.message : String(error);
+    if (messageType === "ready" && error instanceof GitReferenceUnavailableError) {
+      outputLogger.warn(`Clearing persisted state after bootstrap failure: ${message}`);
+      this.service.resetPersistedState();
+      await this.onStateCleared?.();
+      await this.controller.handleMessage({ type: "ready" }, alwaysCurrentExecution);
       return;
     }
 
-    const gitExtension = vscode.extensions.getExtension<GitExtension>("vscode.git");
-    if (!gitExtension) {
-      await this.postMessage({
-        type: "errorOccurred",
-        payload: { message: "VS Code Git extension is not available." }
-      });
-      return;
-    }
-
-    const gitApi = gitExtension.isActive ? gitExtension.exports.getAPI(1) : (await gitExtension.activate()).getAPI(1);
-    const fileUri = this.resolveWorkspaceFileUri(filePath);
-    const repository = gitApi.getRepository(fileUri);
-    const previousRef = `${selectedCommitId}^`;
-    const previousUri = gitApi.toGitUri(fileUri, previousRef);
-    const selectedUri = gitApi.toGitUri(fileUri, selectedCommitId);
-    const previousCommit = await repository?.getCommit(previousRef);
-    const previousShortHash = (previousCommit?.hash ?? previousRef).slice(0, 7);
-    const title = `${path.basename(filePath)} (${previousShortHash} - ${selectedCommitId.slice(0, 7)})`;
-
-    outputLogger.info(`Opening diff for ${filePath} at commit ${selectedCommitId}`);
-    await vscode.commands.executeCommand("vscode.diff", previousUri, selectedUri, title);
-  }
-
-  private async handleRevertSelectedChanges(filePath: string): Promise<void> {
-    const selectedCommitId = this.service.getSelection().selectedCommitId;
-    if (!selectedCommitId) {
-      await this.postMessage({
-        type: "errorOccurred",
-        payload: { message: "No commit is selected." }
-      });
-      return;
-    }
-
-    const confirmation = await vscode.window.showWarningMessage(
-      `Revert selected changes in ${filePath}? This will modify your working tree.`,
-      { modal: true },
-      "Revert"
-    );
-    if (confirmation !== "Revert") {
-      return;
-    }
-
-    const gitExtension = vscode.extensions.getExtension<GitExtension>("vscode.git");
-    if (!gitExtension) {
-      await this.postMessage({
-        type: "errorOccurred",
-        payload: { message: "VS Code Git extension is not available." }
-      });
-      return;
-    }
-
-    const gitApi = gitExtension.isActive ? gitExtension.exports.getAPI(1) : (await gitExtension.activate()).getAPI(1);
-    const fileUri = this.resolveWorkspaceFileUri(filePath);
-    const repository = gitApi.getRepository(fileUri);
-    if (!repository) {
-      await this.postMessage({
-        type: "errorOccurred",
-        payload: { message: "No Git repository was found for the selected file." }
-      });
-      return;
-    }
-
-    const previousRef = `${selectedCommitId}^`;
-    const patch = await repository.diffBetweenPatch(previousRef, selectedCommitId, filePath);
-    if (!patch.trim()) {
-      await this.postMessage({
-        type: "errorOccurred",
-        payload: { message: "No changes were found for the selected file." }
-      });
-      return;
-    }
-
-    outputLogger.info(`Reverting selected changes for ${filePath} at commit ${selectedCommitId}`);
-    await repository.apply(patch, { reverse: true, threeWay: true });
-    await this.reloadBootstrap();
-  }
-
-  private resolveWorkspaceFileUri(filePath: string): vscode.Uri {
-    const repositoryRoot = this.service.getRepositoryRoot();
-    const normalizedRepositoryRoot = path.resolve(repositoryRoot);
-    const trimmedPath = filePath.trim();
-
-    if (!trimmedPath) {
-      throw new Error("No file path was provided.");
-    }
-
-    if (path.isAbsolute(trimmedPath)) {
-      throw new Error("Absolute file paths are not allowed.");
-    }
-
-    const resolvedPath = path.resolve(normalizedRepositoryRoot, trimmedPath);
-    const relativePath = path.relative(normalizedRepositoryRoot, resolvedPath);
-    const isOutsideRepository =
-      relativePath === ".." || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath);
-
-    if (isOutsideRepository) {
-      throw new Error("The selected file is outside the repository.");
-    }
-
-    return vscode.Uri.file(resolvedPath);
-  }
-
-  private async handleRunCommand(command: WebviewCommand, execution: MessageExecutionContext): Promise<void> {
-    switch (command) {
-      case "refs:newBranch":
-        await vscode.commands.executeCommand("git.branch");
-        await this.reloadBootstrap(execution);
-        return;
-      case "refs:fetch":
-        await vscode.commands.executeCommand("git.fetch");
-        await this.reloadBootstrap(execution);
-        return;
-      case "refs:updateSelected":
-        await this.reloadBootstrap(execution);
-        return;
-      case "commits:goToRef": {
-        const query = await vscode.window.showInputBox({
-          title: "Go to hash/branch/tag",
-          prompt: "Enter a branch, tag, ref, or commit text to filter the log.",
-          placeHolder: "main, origin/main, v1.0.0, a1b2c3d",
-          ignoreFocusOut: true
-        });
-        if (!query) {
-          return;
-        }
-        if (!execution.isCurrent()) {
-          outputLogger.info("Skipping stale go-to-ref command.");
-          return;
-        }
-        await this.service.navigateToRefOrHash(query);
-        await this.reloadBootstrap(execution);
-        return;
-      }
-      case "commits:cherryPick":
-      case "refs:deleteSelected":
-      case "refs:compareWithCurrent":
-        await this.postMessage({
-          type: "errorOccurred",
-          payload: { message: `Action ${command} is not implemented yet.` }
-        });
-        return;
-      default:
-        await this.postMessage({
-          type: "errorOccurred",
-          payload: { message: `Unknown command: ${command}` }
-        });
-    }
-  }
-
-  private async postSelectionPayloads(
-    selection: SelectionState,
-    commits: CommitListItemViewModel[],
-    selectedCommitDetail: CommitDetailViewModel | null,
-    execution: MessageExecutionContext
-  ): Promise<void> {
-    if (!execution.isCurrent()) {
-      outputLogger.info("Skipping stale selection payloads.");
-      return;
-    }
-
-    await this.postMessage({
-      type: "selectionUpdated",
-      payload: selection
-    });
-    await this.postMessage({
-      type: "commitsUpdated",
-      payload: {
-        refId: selection.selectedRefId,
-        commits
-      }
-    });
-    await this.postMessage({
-      type: "commitDetailsUpdated",
-      payload: {
-        commitId: selection.selectedCommitId,
-        detail: selectedCommitDetail
-      }
-    });
-    this.onStateChanged?.();
-  }
-
-  private async withLoading(
-    areas: Array<"refs" | "commits" | "details">,
-    execution: MessageExecutionContext,
-    action: () => Promise<void>
-  ): Promise<void> {
-    if (execution.isCurrent()) {
-      for (const area of areas) {
-        await this.postMessage({
-          type: "loadingStateChanged",
-          payload: { area, isLoading: true }
-        });
-      }
-    }
-
-    try {
-      await action();
-    } finally {
-      if (execution.isCurrent()) {
-        for (const area of areas) {
-          await this.postMessage({
-            type: "loadingStateChanged",
-            payload: { area, isLoading: false }
-          });
-        }
-      }
-    }
-  }
-
-  private async postMessage(message: ExtensionToWebviewMessage): Promise<void> {
-    const validated = extensionToWebviewMessageSchema.parse(message);
-    outputLogger.info(`Posting message to webview: ${validated.type}`);
-    await this.panel.webview.postMessage(validated);
-  }
-
-  private async reloadBootstrap(execution: MessageExecutionContext = alwaysCurrentExecution): Promise<void> {
-    await this.withLoading(["refs", "commits", "details"], execution, async () => {
-      const bootstrap = await this.service.getBootstrapState();
-      if (!execution.isCurrent()) {
-        outputLogger.info("Skipping stale bootstrap reload payload.");
-        return;
-      }
-      await this.postMessage({
-        type: "bootstrap",
-        payload: bootstrap
-      });
-      this.onStateChanged?.();
-    });
-  }
-}
-
-function safeJson(value: unknown): string {
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return "[unserializable]";
+    outputLogger.error(`Failed to handle message ${messageType}: ${message}`);
+    await this.messenger.clearLoading(["refs", "commits", "details"]);
+    await this.messenger.postError(message);
   }
 }

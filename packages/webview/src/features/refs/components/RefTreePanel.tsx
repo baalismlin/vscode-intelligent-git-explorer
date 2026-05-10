@@ -1,6 +1,6 @@
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
-import { WebviewCommand } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
+import { WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 import { isSelectableRef } from "@app/navigation";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
@@ -270,14 +270,14 @@ function RefToolButton({
   );
 }
 
-function runRefCommand(command: WebviewCommand): void {
-  postMessageToHost({
-    type: "runCommand",
-    payload: {
-      command
-    }
-  });
+function runRefCommand(type: RefCommandMessageType): void {
+  postMessageToHost({ type });
 }
+
+type RefCommandMessageType = Extract<
+  WebviewToExtensionMessage["type"],
+  "refs:newBranch" | "refs:updateSelected" | "refs:deleteSelected" | "refs:compareWithCurrent" | "refs:fetch"
+>;
 
 function flattenDirectoryGroups(nodes: GitRefNode[]): GitRefNode[] {
   return nodes.map((node) => flattenDirectoryGroupNode(node, "", 0)).flat();

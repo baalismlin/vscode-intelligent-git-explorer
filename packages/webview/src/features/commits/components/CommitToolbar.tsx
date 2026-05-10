@@ -97,10 +97,7 @@ export function CommitToolbar(): JSX.Element {
           iconClassName="codicon codicon-git-commit"
           onClick={() =>
             postMessageToHost({
-              type: "runCommand",
-              payload: {
-                command: "commits:cherryPick"
-              }
+              type: "commits:cherryPick"
             })
           }
         />
@@ -109,10 +106,7 @@ export function CommitToolbar(): JSX.Element {
           iconClassName="codicon codicon-search"
           onClick={() =>
             postMessageToHost({
-              type: "runCommand",
-              payload: {
-                command: "commits:goToRef"
-              }
+              type: "commits:goToRef"
             })
           }
         />
