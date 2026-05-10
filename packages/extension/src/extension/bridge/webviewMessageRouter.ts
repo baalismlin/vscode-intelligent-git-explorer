@@ -11,6 +11,7 @@ import {
 } from "@intelligent-git-log/contracts/extensionToWebviewProtocol";
 import {
   WebviewCommand,
+  WebviewToExtensionMessage,
   webviewToExtensionMessageSchema
 } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 import { GitLogApplicationService } from "#application/gitLogApplicationService";
@@ -31,12 +32,22 @@ interface GitRepository {
   apply(patch: string, options?: { allowEmpty?: boolean; reverse?: boolean; threeWay?: boolean }): Promise<void>;
 }
 
+interface MessageExecutionContext {
+  isCurrent(): boolean;
+}
+
+const alwaysCurrentExecution: MessageExecutionContext = {
+  isCurrent: () => true
+};
+
 export class WebviewMessageRouter {
   private readonly panel: vscode.WebviewPanel;
   private readonly service: GitLogApplicationService;
   private readonly onStateChanged?: () => void;
   private readonly onStateCleared?: () => PromiseLike<void> | void;
   private readonly disposables: vscode.Disposable[] = [];
+  private stateChangeQueue: Promise<void> = Promise.resolve();
+  private latestStateChangeId = 0;
 
   public constructor(
     panel: vscode.WebviewPanel,
@@ -63,14 +74,14 @@ export class WebviewMessageRouter {
         }
 
         try {
-          await this.handleMessage(result.data);
+          await this.enqueueMessage(result.data);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           if (result.data.type === "ready" && isInvalidPersistedStateError(message)) {
             outputLogger.warn(`Clearing persisted state after bootstrap failure: ${message}`);
             this.service.resetPersistedState();
             await this.onStateCleared?.();
-            await this.handleMessage(result.data);
+            await this.handleMessage(result.data, alwaysCurrentExecution);
             return;
           }
 
@@ -102,7 +113,38 @@ export class WebviewMessageRouter {
     }
   }
 
-  private async handleMessage(message: ReturnType<typeof webviewToExtensionMessageSchema.parse>): Promise<void> {
+  private async enqueueMessage(message: WebviewToExtensionMessage): Promise<void> {
+    const stateChangeId = ++this.latestStateChangeId;
+    const execution: MessageExecutionContext = {
+      isCurrent: () => stateChangeId === this.latestStateChangeId
+    };
+
+    const current = this.stateChangeQueue
+      .catch(() => undefined)
+      .then(async () => {
+        if (!execution.isCurrent()) {
+          outputLogger.info(`Skipping stale webview message before execution: ${message.type}`);
+          return;
+        }
+
+        try {
+          await this.handleMessage(message, execution);
+        } catch (error) {
+          if (!execution.isCurrent()) {
+            const reason = error instanceof Error ? error.message : String(error);
+            outputLogger.info(`Ignoring stale webview message failure for ${message.type}: ${reason}`);
+            return;
+          }
+
+          throw error;
+        }
+      });
+
+    this.stateChangeQueue = current.catch(() => undefined);
+    await current;
+  }
+
+  private async handleMessage(message: WebviewToExtensionMessage, execution: MessageExecutionContext): Promise<void> {
     switch (message.type) {
       case "log": {
         const line = `Webview ${message.payload.level}: ${message.payload.message}`;
@@ -117,8 +159,12 @@ export class WebviewMessageRouter {
       }
       case "ready": {
         outputLogger.info("Handling webview ready event.");
-        await this.withLoading(["refs", "commits", "details"], async () => {
+        await this.withLoading(["refs", "commits", "details"], execution, async () => {
           const bootstrap = await this.service.getBootstrapState();
+          if (!execution.isCurrent()) {
+            outputLogger.info("Skipping stale bootstrap payload.");
+            return;
+          }
           await this.postMessage({
             type: "bootstrap",
             payload: bootstrap
@@ -128,16 +174,20 @@ export class WebviewMessageRouter {
       }
       case "selectRef": {
         outputLogger.info(`Selecting ref: ${message.payload.refId}`);
-        await this.withLoading(["commits", "details"], async () => {
+        await this.withLoading(["commits", "details"], execution, async () => {
           const result = await this.service.selectRef(message.payload.refId);
-          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail);
+          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
         });
         return;
       }
       case "selectCommit": {
         outputLogger.info(`Selecting commit: ${message.payload.commitId}`);
-        await this.withLoading(["details"], async () => {
+        await this.withLoading(["details"], execution, async () => {
           const result = await this.service.selectCommit(message.payload.commitId);
+          if (!execution.isCurrent()) {
+            outputLogger.info("Skipping stale selected commit payload.");
+            return;
+          }
           await this.postMessage({
             type: "selectionUpdated",
             payload: result.selection
@@ -155,17 +205,17 @@ export class WebviewMessageRouter {
       }
       case "setFilters": {
         outputLogger.info(`Updating filters: ${safeJson(message.payload)}`);
-        await this.withLoading(["commits", "details"], async () => {
+        await this.withLoading(["commits", "details"], execution, async () => {
           const result = await this.service.setFilters(message.payload);
-          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail);
+          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
         });
         return;
       }
       case "refresh": {
         outputLogger.info("Refreshing commit list.");
-        await this.withLoading(["commits", "details"], async () => {
+        await this.withLoading(["commits", "details"], execution, async () => {
           const result = await this.service.refresh();
-          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail);
+          await this.postSelectionPayloads(result.selection, result.commits, result.selectedCommitDetail, execution);
         });
         return;
       }
@@ -179,7 +229,7 @@ export class WebviewMessageRouter {
         await this.handleRevertSelectedChanges(message.payload.path);
         return;
       case "runCommand":
-        await this.handleRunCommand(message.payload.command);
+        await this.handleRunCommand(message.payload.command, execution);
         return;
       default:
         return;
@@ -284,18 +334,18 @@ export class WebviewMessageRouter {
     return vscode.Uri.file(path.isAbsolute(filePath) ? filePath : path.join(repositoryRoot, filePath));
   }
 
-  private async handleRunCommand(command: WebviewCommand): Promise<void> {
+  private async handleRunCommand(command: WebviewCommand, execution: MessageExecutionContext): Promise<void> {
     switch (command) {
       case "refs:newBranch":
         await vscode.commands.executeCommand("git.branch");
-        await this.reloadBootstrap();
+        await this.reloadBootstrap(execution);
         return;
       case "refs:fetch":
         await vscode.commands.executeCommand("git.fetch");
-        await this.reloadBootstrap();
+        await this.reloadBootstrap(execution);
         return;
       case "refs:updateSelected":
-        await this.reloadBootstrap();
+        await this.reloadBootstrap(execution);
         return;
       case "commits:goToRef": {
         const query = await vscode.window.showInputBox({
@@ -307,8 +357,12 @@ export class WebviewMessageRouter {
         if (!query) {
           return;
         }
+        if (!execution.isCurrent()) {
+          outputLogger.info("Skipping stale go-to-ref command.");
+          return;
+        }
         await this.service.navigateToRefOrHash(query);
-        await this.reloadBootstrap();
+        await this.reloadBootstrap(execution);
         return;
       }
       case "commits:cherryPick":
@@ -330,8 +384,14 @@ export class WebviewMessageRouter {
   private async postSelectionPayloads(
     selection: SelectionState,
     commits: CommitListItemViewModel[],
-    selectedCommitDetail: CommitDetailViewModel | null
+    selectedCommitDetail: CommitDetailViewModel | null,
+    execution: MessageExecutionContext
   ): Promise<void> {
+    if (!execution.isCurrent()) {
+      outputLogger.info("Skipping stale selection payloads.");
+      return;
+    }
+
     await this.postMessage({
       type: "selectionUpdated",
       payload: selection
@@ -355,23 +415,28 @@ export class WebviewMessageRouter {
 
   private async withLoading(
     areas: Array<"refs" | "commits" | "details">,
+    execution: MessageExecutionContext,
     action: () => Promise<void>
   ): Promise<void> {
-    for (const area of areas) {
-      await this.postMessage({
-        type: "loadingStateChanged",
-        payload: { area, isLoading: true }
-      });
+    if (execution.isCurrent()) {
+      for (const area of areas) {
+        await this.postMessage({
+          type: "loadingStateChanged",
+          payload: { area, isLoading: true }
+        });
+      }
     }
 
     try {
       await action();
     } finally {
-      for (const area of areas) {
-        await this.postMessage({
-          type: "loadingStateChanged",
-          payload: { area, isLoading: false }
-        });
+      if (execution.isCurrent()) {
+        for (const area of areas) {
+          await this.postMessage({
+            type: "loadingStateChanged",
+            payload: { area, isLoading: false }
+          });
+        }
       }
     }
   }
@@ -382,9 +447,13 @@ export class WebviewMessageRouter {
     await this.panel.webview.postMessage(validated);
   }
 
-  private async reloadBootstrap(): Promise<void> {
-    await this.withLoading(["refs", "commits", "details"], async () => {
+  private async reloadBootstrap(execution: MessageExecutionContext = alwaysCurrentExecution): Promise<void> {
+    await this.withLoading(["refs", "commits", "details"], execution, async () => {
       const bootstrap = await this.service.getBootstrapState();
+      if (!execution.isCurrent()) {
+        outputLogger.info("Skipping stale bootstrap reload payload.");
+        return;
+      }
       await this.postMessage({
         type: "bootstrap",
         payload: bootstrap
