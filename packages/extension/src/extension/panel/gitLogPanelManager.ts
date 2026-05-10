@@ -4,8 +4,9 @@ import { GitLogPanelSession } from "./gitLogPanelSession";
 import { GitLogServiceFactory } from "./gitLogServiceFactory";
 import { WebviewHtmlRenderer } from "./webviewHtmlRenderer";
 
-export class GitLogPanelManager {
-  public static readonly viewType = "intelligentGitLog.panel";
+const viewType = "intelligentGitLog.panel";
+
+export class GitLogPanelManager implements vscode.Disposable {
   private currentSession: GitLogPanelSession | undefined;
 
   public createOrShow(context: vscode.ExtensionContext): void {
@@ -19,7 +20,7 @@ export class GitLogPanelManager {
 
     outputLogger.info("Creating new Git Log panel.");
     const panel = vscode.window.createWebviewPanel(
-      GitLogPanelManager.viewType,
+      viewType,
       "Intelligent Git Log",
       column,
       {
@@ -45,9 +46,7 @@ export class GitLogPanelManager {
     });
   }
 
-  public disposeCurrent(): void {
+  public dispose(): void {
     this.currentSession?.dispose();
   }
 }
-
-export const gitLogPanelManager = new GitLogPanelManager();
