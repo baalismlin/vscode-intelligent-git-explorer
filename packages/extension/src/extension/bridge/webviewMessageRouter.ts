@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
 import * as path from "node:path";
-import { SelectionState } from "@intellij-git-log/contracts/gitLogModels";
+import { SelectionState } from "@intelligent-git-log/contracts/gitLogModels";
 import {
   CommitDetailViewModel,
   CommitListItemViewModel
-} from "@intellij-git-log/contracts/gitLogViewModels";
+} from "@intelligent-git-log/contracts/gitLogViewModels";
 import {
   extensionToWebviewMessageSchema,
   ExtensionToWebviewMessage
-} from "@intellij-git-log/contracts/extensionToWebviewProtocol";
+} from "@intelligent-git-log/contracts/extensionToWebviewProtocol";
 import {
   WebviewCommand,
   webviewToExtensionMessageSchema
-} from "@intellij-git-log/contracts/webviewToExtensionProtocol";
+} from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 import { GitLogApplicationService } from "#application/gitLogApplicationService";
 import { outputLogger } from "#extension/logging/outputLogger";
 

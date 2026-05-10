@@ -1,7 +1,7 @@
 {
-  "name": "vscode-intellij-git-explorer",
-  "displayName": "IntelliJ Git Log",
-  "description": "MVP VS Code extension that recreates the IntelliJ IDEA Git Log.",
+  "name": "vscode-intelligent-git-explorer",
+  "displayName": "Intelligent Git Log",
+  "description": "MVP VS Code extension that recreates the Intelligent Git Log.",
   "version": "0.0.1",
   "publisher": "local",
   "license": "MIT",
@@ -14,7 +14,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:intellijGitLog.open"
+    "onCommand:intelligentGitLog.open"
   ],
   "extensionDependencies": [
     "vscode.git"
@@ -23,20 +23,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "intellijGitLog.open",
-        "title": "Open IntelliJ Git Log"
+        "command": "intelligentGitLog.open",
+        "title": "Open Intelligent Git Log"
       }
     ]
   },
   "scripts": {
     "build": "pnpm run build:contracts && pnpm run build:extension && pnpm run build:webview",
-    "build:contracts": "pnpm --filter @intellij-git-log/contracts build",
-    "build:extension": "pnpm --filter @intellij-git-log/extension build",
-    "build:webview": "pnpm --filter @intellij-git-log/webview build",
-    "watch": "pnpm --filter @intellij-git-log/extension build --watch"
+    "build:contracts": "pnpm --filter @intelligent-git-log/contracts build",
+    "build:extension": "pnpm --filter @intelligent-git-log/extension build",
+    "build:webview": "pnpm --filter @intelligent-git-log/webview build",
+    "watch": "pnpm --filter @intelligent-git-log/extension build --watch"
   },
   "dependencies": {
-    "@intellij-git-log/contracts": "workspace:*",
+    "@intelligent-git-log/contracts": "workspace:*",
     "@vscode/codicons": "^0.0.36"
   }
 }

@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      '@intellij-git-log/contracts':
+      '@intelligent-git-log/contracts':
         specifier: workspace:*
         version: link:packages/contracts
       '@vscode/codicons':
@@ -27,7 +27,7 @@ importers:
 
   packages/extension:
     dependencies:
-      '@intellij-git-log/contracts':
+      '@intelligent-git-log/contracts':
         specifier: workspace:*
         version: link:../contracts
     devDependencies:
@@ -43,7 +43,7 @@ importers:
 
   packages/webview:
     dependencies:
-      '@intellij-git-log/contracts':
+      '@intelligent-git-log/contracts':
         specifier: workspace:*
         version: link:../contracts
       react:

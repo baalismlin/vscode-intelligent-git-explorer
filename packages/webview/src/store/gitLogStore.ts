@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { FilterState, GitRefNode, SelectionState } from "@intellij-git-log/contracts/gitLogModels";
-import { CommitDetailViewModel, CommitListItemViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
-import { GitLogBootstrapViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
+import { FilterState, GitRefNode, SelectionState } from "@intelligent-git-log/contracts/gitLogModels";
+import { CommitDetailViewModel, CommitListItemViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
+import { GitLogBootstrapViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 
 export type FocusedPane = "refs" | "commits" | "files";
 

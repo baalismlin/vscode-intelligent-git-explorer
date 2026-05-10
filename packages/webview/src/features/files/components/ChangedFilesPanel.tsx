@@ -1,4 +1,4 @@
-import { ChangedFileNodeViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
+import { ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";
 import { ChangedFilesTree } from "./ChangedFilesTree";

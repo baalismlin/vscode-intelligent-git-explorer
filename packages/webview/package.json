@@ -1,5 +1,5 @@
 {
-  "name": "@intellij-git-log/webview",
+  "name": "@intelligent-git-log/webview",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "build": "vite build -c vite.config.mts"
   },
   "dependencies": {
-    "@intellij-git-log/contracts": "workspace:*",
+    "@intelligent-git-log/contracts": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "zustand": "^5.0.0"

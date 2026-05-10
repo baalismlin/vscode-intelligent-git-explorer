@@ -1,6 +1,6 @@
 import { useDeferredValue, useMemo, useRef, useState } from "react";
-import { GitRefNode } from "@intellij-git-log/contracts/gitLogModels";
-import { WebviewCommand } from "@intellij-git-log/contracts/webviewToExtensionProtocol";
+import { GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
+import { WebviewCommand } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 import { isSelectableRef } from "@app/navigation";
 import { postMessageToHost } from "@bridge/vscode";
 import { useGitLogStore } from "@store/gitLogStore";

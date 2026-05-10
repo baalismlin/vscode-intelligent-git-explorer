@@ -3,7 +3,7 @@ import {
   GitCommitDetail,
   GitCommitSummary,
   GitRefNode
-} from "@intellij-git-log/contracts/gitLogModels";
+} from "@intelligent-git-log/contracts/gitLogModels";
 
 export interface GitLogProvider {
   getRefs(): Promise<GitRefNode[]>;

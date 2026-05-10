@@ -3,12 +3,12 @@ import {
   GitRefNode,
   GitCommitSummary,
   SelectionState
-} from "@intellij-git-log/contracts/gitLogModels";
+} from "@intelligent-git-log/contracts/gitLogModels";
 import {
   CommitDetailViewModel,
   CommitListItemViewModel,
   GitLogBootstrapViewModel
-} from "@intellij-git-log/contracts/gitLogViewModels";
+} from "@intelligent-git-log/contracts/gitLogViewModels";
 import { GitLogProvider } from "#domain/gitLogProvider";
 import { GitLogViewModelMapper } from "./gitLogViewModelMapper";
 

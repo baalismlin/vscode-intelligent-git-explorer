@@ -7,7 +7,7 @@ import {
   GitCommitDetail,
   GitCommitSummary,
   GitRefNode
-} from "@intellij-git-log/contracts/gitLogModels";
+} from "@intelligent-git-log/contracts/gitLogModels";
 import { GitLogProvider } from "#domain/gitLogProvider";
 
 const execFileAsync = promisify(execFile);

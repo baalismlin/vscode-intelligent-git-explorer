@@ -1,4 +1,4 @@
-import { WebviewToExtensionMessage } from "@intellij-git-log/contracts/webviewToExtensionProtocol";
+import { WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 
 interface VsCodeApi {
   postMessage(message: unknown): void;
@@ -9,12 +9,12 @@ interface VsCodeApi {
 declare global {
   interface Window {
     acquireVsCodeApi?: () => VsCodeApi;
-    __INTELLIJ_GIT_LOG_VSCODE_API__?: VsCodeApi;
+    __INTELLIGENT_GIT_LOG_VSCODE_API__?: VsCodeApi;
   }
 }
 
 const vscode =
-  window.__INTELLIJ_GIT_LOG_VSCODE_API__ ||
+  window.__INTELLIGENT_GIT_LOG_VSCODE_API__ ||
   (window.acquireVsCodeApi ? window.acquireVsCodeApi() : undefined);
 
 export function postMessageToHost(message: WebviewToExtensionMessage): void {

@@ -1,5 +1,5 @@
-import { GitRefNode } from "@intellij-git-log/contracts/gitLogModels";
-import { ChangedFileNodeViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
+import { GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
+import { ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 
 export interface VisibleRefItem {
   id: string;

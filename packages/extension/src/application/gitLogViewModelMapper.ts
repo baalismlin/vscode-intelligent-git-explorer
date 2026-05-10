@@ -3,13 +3,13 @@ import {
   CommitDetailViewModel,
   CommitGraphViewModel,
   CommitListItemViewModel
-} from "@intellij-git-log/contracts/gitLogViewModels";
+} from "@intelligent-git-log/contracts/gitLogViewModels";
 import {
   GitChangedFileNode,
   GitCommitDetail,
   GitCommitSummary,
   GitRefNode
-} from "@intellij-git-log/contracts/gitLogModels";
+} from "@intelligent-git-log/contracts/gitLogModels";
 
 const graphPalette = ["#2f80ed", "#f2994a", "#27ae60", "#9b51e0", "#eb5757", "#56ccf2", "#f2c94c"];
 

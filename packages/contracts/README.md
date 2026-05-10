@@ -1,6 +1,6 @@
 # Contracts Package
 
-`@intellij-git-log/contracts` contains the shared data contracts used by the VS Code extension host and the React webview. Keep this package free of extension or browser runtime dependencies so it remains a stable boundary between processes.
+`@intelligent-git-log/contracts` contains the shared data contracts used by the VS Code extension host and the React webview. Keep this package free of extension or browser runtime dependencies so it remains a stable boundary between processes.
 
 ## Module Boundaries
 

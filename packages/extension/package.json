@@ -1,5 +1,5 @@
 {
-  "name": "@intellij-git-log/extension",
+  "name": "@intelligent-git-log/extension",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",
@@ -13,7 +13,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@intellij-git-log/contracts": "workspace:*"
+    "@intelligent-git-log/contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.16.11",

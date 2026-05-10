@@ -6,7 +6,7 @@ import { WebviewMessageRouter } from "#extension/bridge/webviewMessageRouter";
 import { outputLogger } from "#extension/logging/outputLogger";
 
 export class GitLogPanel {
-  public static readonly viewType = "intellijGitLog.panel";
+  public static readonly viewType = "intelligentGitLog.panel";
   private static currentPanel: GitLogPanel | undefined;
 
   public static createOrShow(context: vscode.ExtensionContext): void {
@@ -22,7 +22,7 @@ export class GitLogPanel {
 
     const panel = vscode.window.createWebviewPanel(
       GitLogPanel.viewType,
-      "IntelliJ Git Log",
+      "Intelligent Git Log",
       column,
       {
         enableScripts: true,
@@ -155,16 +155,16 @@ export class GitLogPanel {
       content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IntelliJ Git Log</title>
+    <title>Intelligent Git Log</title>
     <link rel="stylesheet" href="${codiconStyleUri}" />
     <link rel="stylesheet" href="${styleUri}" />
   </head>
   <body>
-    <div id="root">Loading IntelliJ Git Log...</div>
+    <div id="root">Loading Intelligent Git Log...</div>
     <script nonce="${nonce}">
-      window.__INTELLIJ_GIT_LOG_VSCODE_API__ =
-        window.__INTELLIJ_GIT_LOG_VSCODE_API__ || (window.acquireVsCodeApi ? window.acquireVsCodeApi() : undefined);
-      const vscodeApi = window.__INTELLIJ_GIT_LOG_VSCODE_API__;
+      window.__INTELLIGENT_GIT_LOG_VSCODE_API__ =
+        window.__INTELLIGENT_GIT_LOG_VSCODE_API__ || (window.acquireVsCodeApi ? window.acquireVsCodeApi() : undefined);
+      const vscodeApi = window.__INTELLIGENT_GIT_LOG_VSCODE_API__;
       if (!globalThis.process) {
         globalThis.process = { env: { NODE_ENV: "production" } };
       } else if (!globalThis.process.env) {
@@ -229,7 +229,7 @@ export class GitLogPanel {
   </head>
   <body>
     <div class="error-box">
-      <div class="error-title">Failed to load IntelliJ Git Log</div>
+      <div class="error-title">Failed to load Intelligent Git Log</div>
       <div class="error-text">${escapeHtml(reason)}</div>
     </div>
   </body>
@@ -258,5 +258,5 @@ function escapeHtml(value: string): string {
 }
 
 function getPersistenceKey(repositoryRoot: string): string {
-  return `intellijGitLog:${repositoryRoot}`;
+  return `intelligentGitLog:${repositoryRoot}`;
 }

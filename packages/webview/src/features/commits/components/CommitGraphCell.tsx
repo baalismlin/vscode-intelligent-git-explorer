@@ -1,4 +1,4 @@
-import { CommitListItemViewModel } from "@intellij-git-log/contracts/gitLogViewModels";
+import { CommitListItemViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 
 export function CommitGraphCell({ commit }: { commit: CommitListItemViewModel }): JSX.Element {
   const laneOffset = 14 + commit.graph.lane * 18;
