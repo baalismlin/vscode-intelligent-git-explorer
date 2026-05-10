@@ -51,6 +51,8 @@ export class GitLogPanel {
     this.panel = panel;
     this.context = context;
 
+    this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
+
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (!workspaceFolder) {
       const message = "Open a workspace folder to load Git history.";
@@ -79,8 +81,7 @@ export class GitLogPanel {
       null,
       this.disposables
     );
-    this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
-    void this.initializeWebview(context.extensionUri).catch((error) => {
+    this.initializeWebview(context.extensionUri).catch((error) => {
       const reason = error instanceof Error ? error.message : String(error);
       outputLogger.error(`Failed to initialize webview: ${reason}`);
       this.panel.webview.html = this.getErrorHtml(reason);
