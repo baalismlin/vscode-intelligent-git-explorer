@@ -37,6 +37,10 @@ export class GitLogPanel {
     GitLogPanel.currentPanel = new GitLogPanel(panel, context);
   }
 
+  public static disposeCurrent(): void {
+    GitLogPanel.currentPanel?.dispose();
+  }
+
   private readonly panel: vscode.WebviewPanel;
   private readonly router?: WebviewMessageRouter;
   private readonly disposables: vscode.Disposable[] = [];
@@ -84,7 +88,9 @@ export class GitLogPanel {
   }
 
   public dispose(): void {
-    GitLogPanel.currentPanel = undefined;
+    if (GitLogPanel.currentPanel === this) {
+      GitLogPanel.currentPanel = undefined;
+    }
     outputLogger.info("Disposing Git Log panel.");
     this.router?.dispose();
 
