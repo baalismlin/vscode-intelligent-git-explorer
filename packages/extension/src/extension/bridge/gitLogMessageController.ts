@@ -7,8 +7,7 @@ import { GitLogViewSynchronizer } from "./gitLogViewSynchronizer";
 import { MessageExecutionContext } from "./messageExecutionQueue";
 import {
   WebviewMessageAction,
-  WebviewMessageActionRegistry,
-  WebviewMessageType
+  WebviewMessageActionRegistry
 } from "./webviewMessageActionRegistry";
 import { WebviewMessenger } from "./webviewMessenger";
 
@@ -30,7 +29,7 @@ export class GitLogMessageController {
     message: WebviewToExtensionMessage,
     execution: MessageExecutionContext
   ): Promise<void> {
-    const action = this.messageActions.get(message.type) as WebviewMessageAction<WebviewMessageType> | undefined;
+    const action = this.messageActions.get(message.type) as WebviewMessageAction | undefined;
     if (!action) {
       const errorMessage = `No handler is registered for webview message: ${message.type}`;
       outputLogger.error(errorMessage);
