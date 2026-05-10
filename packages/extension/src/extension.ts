@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { registerOpenGitLogCommand } from "#extension/commands/openGitLogCommand";
 import { outputLogger } from "#extension/logging/outputLogger";
-import { GitLogPanel } from "#extension/panel/gitLogPanel";
+import { gitLogPanelManager } from "#extension/panel/gitLogPanelManager";
 
 export function activate(context: vscode.ExtensionContext): void {
   outputLogger.info("Extension activated.");
@@ -10,6 +10,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
 export function deactivate(): void {
   outputLogger.info("Extension deactivated.");
-  GitLogPanel.disposeCurrent();
+  gitLogPanelManager.disposeCurrent();
   outputLogger.dispose();
 }
