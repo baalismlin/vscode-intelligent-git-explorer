@@ -1,6 +1,7 @@
 import { type ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
 import { webviewCommands } from "@bridge/webviewCommands";
 import { useGitLogStore } from "@store/gitLogStore";
+import { countFiles } from "../fileTreeUtils";
 
 export function ChangedFilesTree({
   node,
@@ -65,19 +66,6 @@ export function ChangedFilesTree({
         <span className="file-label">{node.name}</span>
         {node.type === "folder" ? <span className="file-count">{fileCount} files</span> : null}
       </div>
-      {hasChildren && isExpanded
-        ? node.children?.map((child) => (
-            <ChangedFilesTree key={child.id} node={child} depth={depth + 1} />
-          ))
-        : null}
     </div>
   );
-}
-
-function countFiles(node: ChangedFileNodeViewModel): number {
-  if (node.type === "file") {
-    return 1;
-  }
-
-  return node.children?.reduce((count, child) => count + countFiles(child), 0) ?? 0;
 }

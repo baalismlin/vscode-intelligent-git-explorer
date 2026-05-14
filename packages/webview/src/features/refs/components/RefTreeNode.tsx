@@ -69,16 +69,6 @@ export function RefTreeNode({
         {node.type === "head" ? <span className="ref-type">current</span> : null}
         {hasHeadChildBranch ? <span className="ref-branch-inline">{headBranchName}</span> : null}
       </div>
-      {hasChildren && isExpanded
-        ? node.children?.map((child) => (
-            <RefTreeNode
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              forceExpanded={forceExpanded}
-            />
-          ))
-        : null}
     </div>
   );
 }

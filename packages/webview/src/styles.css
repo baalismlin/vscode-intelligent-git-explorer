@@ -637,14 +637,35 @@ select {
   padding-top: 0;
 }
 
+.virtual-list-content {
+  position: relative;
+  padding-top: 0;
+}
+
 .commit-row {
   height: 25px;
   border-bottom: 1px solid #f1f3f7;
 }
 
-.commit-list-window {
+.virtual-list-window {
   position: absolute;
   inset: 0 0 auto;
+}
+
+.reference-tree-pane .virtual-list-window {
+  right: auto;
+  min-width: 100%;
+  width: max-content;
+}
+
+.file-tree .virtual-list-window {
+  min-width: 100%;
+}
+
+.commit-list-overlay-host {
+  position: absolute;
+  inset: 26px 0 0;
+  pointer-events: none;
 }
 
 .commit-cell {

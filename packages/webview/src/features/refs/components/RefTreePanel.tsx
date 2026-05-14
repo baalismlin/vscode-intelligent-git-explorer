@@ -1,6 +1,7 @@
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { isSelectableRef } from "@app/navigation";
 import { webviewCommands } from "@bridge/webviewCommands";
+import { VirtualList } from "@shared/components/VirtualList";
 import { useGitLogStore } from "@store/gitLogStore";
 import { RefToolButton } from "./RefToolButton";
 import { RefTreeNode } from "./RefTreeNode";
@@ -8,17 +9,20 @@ import {
   collectExpandableRefIds,
   filterRefs,
   findRefById,
+  flattenVisibleRefTree,
   flattenDirectoryGroups
 } from "../refTreeUtils";
 
 const collapsedRefsWidth = 28;
 const defaultExpandedRefsWidth = 270;
+const refRowHeight = 20;
 
 export function RefTreePanel(): JSX.Element {
   const refs = useGitLogStore((state) => state.refs);
   const refsWidth = useGitLogStore((state) => state.panelLayout.refsWidth);
   const setPanelLayout = useGitLogStore((state) => state.setPanelLayout);
   const selectedRefId = useGitLogStore((state) => state.selection.selectedRefId);
+  const expandedRefs = useGitLogStore((state) => state.expandedRefs);
   const setExpandedRefs = useGitLogStore((state) => state.setExpandedRefs);
   const [searchQuery, setSearchQuery] = useState("");
   const [groupByDirectory, setGroupByDirectory] = useState(true);
@@ -45,6 +49,10 @@ export function RefTreePanel(): JSX.Element {
   }, [deferredSearchQuery, groupByDirectory, refs]);
 
   const expandableRefIds = useMemo(() => collectExpandableRefIds(visibleRefs), [visibleRefs]);
+  const visibleRefRows = useMemo(
+    () => flattenVisibleRefTree(visibleRefs, expandedRefs, Boolean(deferredSearchQuery)),
+    [deferredSearchQuery, expandedRefs, visibleRefs]
+  );
   const selectedRef = selectedRefId ? findRefById(refs, selectedRefId) : undefined;
 
   if (isCollapsed) {
@@ -142,24 +150,23 @@ export function RefTreePanel(): JSX.Element {
             onClick={() => setExpandedRefs([])}
           />
         </div>
-        <div className="reference-tree-pane">
-          <div className="reference-tree-content">
-            <div className="tree">
-              {visibleRefs.length > 0 ? (
-                visibleRefs.map((node) => (
-                  <RefTreeNode
-                    key={node.id}
-                    node={node}
-                    depth={0}
-                    forceExpanded={Boolean(deferredSearchQuery)}
-                  />
-                ))
-              ) : (
-                <div className="reference-empty-state">No references match the current filter.</div>
-              )}
-            </div>
-          </div>
-        </div>
+        <VirtualList
+          items={visibleRefRows}
+          rowHeight={refRowHeight}
+          className="reference-tree-pane"
+          contentClassName="reference-tree-content tree virtual-list-content"
+          emptyState={
+            <div className="reference-empty-state">No references match the current filter.</div>
+          }
+          getKey={(item) => item.node.id}
+          renderItem={(item) => (
+            <RefTreeNode
+              node={item.node}
+              depth={item.depth}
+              forceExpanded={Boolean(deferredSearchQuery)}
+            />
+          )}
+        />
       </div>
     </section>
   );

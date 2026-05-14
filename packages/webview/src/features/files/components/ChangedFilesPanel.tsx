@@ -1,18 +1,30 @@
-import { type ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
+import { useMemo } from "react";
 import { webviewCommands } from "@bridge/webviewCommands";
+import { VirtualList } from "@shared/components/VirtualList";
 import { useGitLogStore } from "@store/gitLogStore";
 import { ChangedFilesTree } from "./ChangedFilesTree";
 import { CommitDetailsCard } from "./CommitDetailsCard";
+import { collectFolderIds, findFileNode, flattenVisibleFileTree } from "../fileTreeUtils";
+
+const fileRowHeight = 20;
 
 export function ChangedFilesPanel(): JSX.Element {
   const selectedCommitDetail = useGitLogStore((state) => state.selectedCommitDetail);
   const selectedFileId = useGitLogStore((state) => state.selectedFileId);
+  const expandedFiles = useGitLogStore((state) => state.expandedFiles);
   const setExpandedFiles = useGitLogStore((state) => state.setExpandedFiles);
 
   const selectedFile = selectedCommitDetail
     ? findFileNode(selectedCommitDetail.changedFiles, selectedFileId)
     : undefined;
   const canUseSelectedFile = selectedFile?.type === "file";
+  const visibleFiles = useMemo(
+    () =>
+      selectedCommitDetail
+        ? flattenVisibleFileTree(selectedCommitDetail.changedFiles, expandedFiles)
+        : [],
+    [expandedFiles, selectedCommitDetail]
+  );
 
   return (
     <section className="panel files-panel">
@@ -55,15 +67,15 @@ export function ChangedFilesPanel(): JSX.Element {
             onClick={() => setExpandedFiles([])}
           />
         </div>
-        <div className="file-tree">
-          {selectedCommitDetail ? (
-            selectedCommitDetail.changedFiles.map((node) => (
-              <ChangedFilesTree key={node.id} node={node} depth={0} />
-            ))
-          ) : (
-            <div className="empty-state">Select a commit to inspect changed files.</div>
-          )}
-        </div>
+        <VirtualList
+          items={visibleFiles}
+          rowHeight={fileRowHeight}
+          className="file-tree"
+          contentClassName="virtual-list-content"
+          emptyState={<div className="empty-state">Select a commit to inspect changed files.</div>}
+          getKey={(item) => item.node.id}
+          renderItem={(item) => <ChangedFilesTree node={item.node} depth={item.depth} />}
+        />
         <CommitDetailsCard />
       </div>
     </section>
@@ -93,40 +105,4 @@ function DetailToolButton({
       <span className={iconClassName} aria-hidden="true" />
     </button>
   );
-}
-
-function findFileNode(
-  nodes: ChangedFileNodeViewModel[],
-  selectedFileId: string
-): ChangedFileNodeViewModel | undefined {
-  for (const node of nodes) {
-    if (node.id === selectedFileId) {
-      return node;
-    }
-
-    if (node.children?.length) {
-      const nested = findFileNode(node.children, selectedFileId);
-      if (nested) {
-        return nested;
-      }
-    }
-  }
-
-  return undefined;
-}
-
-function collectFolderIds(nodes: ChangedFileNodeViewModel[]): string[] {
-  const result: string[] = [];
-
-  for (const node of nodes) {
-    if (node.type === "folder") {
-      result.push(node.id);
-    }
-
-    if (node.children?.length) {
-      result.push(...collectFolderIds(node.children));
-    }
-  }
-
-  return result;
 }

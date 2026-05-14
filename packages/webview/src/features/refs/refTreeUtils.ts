@@ -1,6 +1,34 @@
 import { type GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
 import { isSelectableRef } from "@app/navigation";
 
+export interface VisibleRefTreeItem {
+  node: GitRefNode;
+  depth: number;
+}
+
+export function flattenVisibleRefTree(
+  nodes: GitRefNode[],
+  expandedIds: string[],
+  forceExpanded: boolean
+): VisibleRefTreeItem[] {
+  const items: VisibleRefTreeItem[] = [];
+
+  const walk = (refs: GitRefNode[], depth: number) => {
+    for (const node of refs) {
+      const hasHeadChildBranch = node.type === "head" && node.children?.length === 1;
+      const hasChildren = Boolean(node.children?.length) && !hasHeadChildBranch;
+      items.push({ node, depth });
+
+      if (hasChildren && (forceExpanded || expandedIds.includes(node.id))) {
+        walk(node.children ?? [], depth + 1);
+      }
+    }
+  };
+
+  walk(nodes, 0);
+  return items;
+}
+
 export function flattenDirectoryGroups(nodes: GitRefNode[]): GitRefNode[] {
   return nodes.map((node) => flattenDirectoryGroupNode(node, "", 0)).flat();
 }
