@@ -1,8 +1,7 @@
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { type GitRefNode } from "@intelligent-git-log/contracts/gitLogModels";
-import { type WebviewToExtensionMessage } from "@intelligent-git-log/contracts/webviewToExtensionProtocol";
 import { isSelectableRef } from "@app/navigation";
-import { postMessageToHost } from "@bridge/vscode";
+import { webviewCommands } from "@bridge/webviewCommands";
 import { useGitLogStore } from "@store/gitLogStore";
 
 const collapsedRefsWidth = 28;
@@ -85,27 +84,27 @@ export function RefTreePanel(): JSX.Element {
           <RefToolButton
             label="New Branch"
             iconClassName="codicon codicon-git-branch"
-            onClick={() => runRefCommand("refs:newBranch")}
+            onClick={webviewCommands.createBranch}
           />
           <RefToolButton
             label="Update Selected"
             iconClassName="codicon codicon-sync"
-            onClick={() => runRefCommand("refs:updateSelected")}
+            onClick={webviewCommands.updateSelectedRef}
           />
           <RefToolButton
             label="Delete"
             iconClassName="codicon codicon-trash"
-            onClick={() => runRefCommand("refs:deleteSelected")}
+            onClick={webviewCommands.deleteSelectedRef}
           />
           <RefToolButton
             label="Compare with Current"
             iconClassName="codicon codicon-diff"
-            onClick={() => runRefCommand("refs:compareWithCurrent")}
+            onClick={webviewCommands.compareSelectedRefWithCurrent}
           />
           <RefToolButton
             label="Fetch"
             iconClassName="codicon codicon-cloud-download"
-            onClick={() => runRefCommand("refs:fetch")}
+            onClick={webviewCommands.fetchRefs}
           />
           <RefToolButton
             label="Navigate Log to selected branch HEAD"
@@ -116,12 +115,7 @@ export function RefTreePanel(): JSX.Element {
                 return;
               }
 
-              postMessageToHost({
-                type: "selectRef",
-                payload: {
-                  refId: selectedRefId
-                }
-              });
+              webviewCommands.selectRef(selectedRefId);
             }}
           />
           <RefToolButton
@@ -199,12 +193,7 @@ function RefTreeNode({
             return;
           }
 
-          postMessageToHost({
-            type: "selectRef",
-            payload: {
-              refId: hasHeadChildBranch ? headChildRefId : node.id
-            }
-          });
+          webviewCommands.selectRef(hasHeadChildBranch ? headChildRefId : node.id);
         }}
         onDoubleClick={() => {
           if (hasChildren && !forceExpanded) {
@@ -275,19 +264,6 @@ function RefToolButton({
     </button>
   );
 }
-
-function runRefCommand(type: RefCommandMessageType): void {
-  postMessageToHost({ type });
-}
-
-type RefCommandMessageType = Extract<
-  WebviewToExtensionMessage["type"],
-  | "refs:newBranch"
-  | "refs:updateSelected"
-  | "refs:deleteSelected"
-  | "refs:compareWithCurrent"
-  | "refs:fetch"
->;
 
 function flattenDirectoryGroups(nodes: GitRefNode[]): GitRefNode[] {
   return nodes.map((node) => flattenDirectoryGroupNode(node, "", 0)).flat();

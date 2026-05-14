@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { type CommitListItemViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
-import { postMessageToHost } from "@bridge/vscode";
+import { webviewCommands } from "@bridge/webviewCommands";
 import { useGitLogStore } from "@store/gitLogStore";
 import { CommitGraphCell } from "./CommitGraphCell";
 
@@ -100,12 +100,7 @@ function CommitRow({
           return;
         }
 
-        postMessageToHost({
-          type: "selectCommit",
-          payload: {
-            commitId: commit.id
-          }
-        });
+        webviewCommands.selectCommit(commit.id);
       }}
     >
       <div className="commit-cell graph-cell">

@@ -1,5 +1,5 @@
 import { type ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
-import { postMessageToHost } from "@bridge/vscode";
+import { webviewCommands } from "@bridge/webviewCommands";
 import { useGitLogStore } from "@store/gitLogStore";
 
 export function ChangedFilesTree({
@@ -37,10 +37,7 @@ export function ChangedFilesTree({
           }
 
           if (node.type === "file") {
-            postMessageToHost({
-              type: "openDiff",
-              payload: { path: node.path }
-            });
+            webviewCommands.openDiff(node.path);
           }
         }}
       >

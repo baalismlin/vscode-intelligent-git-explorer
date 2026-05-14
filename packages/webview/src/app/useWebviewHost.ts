@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { subscribeToHostMessages } from "@bridge/messageClient";
-import { postMessageToHost, persistWebviewState, readPersistedWebviewState } from "@bridge/vscode";
+import { persistWebviewState, readPersistedWebviewState } from "@bridge/vscode";
+import { webviewCommands } from "@bridge/webviewCommands";
 import { type PersistedWebviewState, useGitLogStore } from "@store/gitLogStore";
 
 export function useWebviewHost(): void {
@@ -16,7 +17,7 @@ export function useWebviewHost(): void {
       (state) => persistWebviewState(state),
       { equalityFn: arePersistedWebviewStatesEqual }
     );
-    postMessageToHost({ type: "ready" });
+    webviewCommands.ready();
 
     return () => {
       unsubscribe();

@@ -1,5 +1,5 @@
 import { type ChangeEvent, useEffect } from "react";
-import { postMessageToHost } from "@bridge/vscode";
+import { webviewCommands } from "@bridge/webviewCommands";
 import { useGitLogStore } from "@store/gitLogStore";
 
 const DATE_FILTER_OPTIONS = [
@@ -24,10 +24,7 @@ export function CommitToolbar(): JSX.Element {
       paths: ""
     };
     setFilters(nextFilters);
-    postMessageToHost({
-      type: "setFilters",
-      payload: nextFilters
-    });
+    webviewCommands.setFilters(nextFilters);
   }, [filters, setFilters]);
 
   const updateFilter =
@@ -37,10 +34,7 @@ export function CommitToolbar(): JSX.Element {
         [key]: event.target.value
       };
       setFilters(nextFilters);
-      postMessageToHost({
-        type: "setFilters",
-        payload: nextFilters
-      });
+      webviewCommands.setFilters(nextFilters);
     };
 
   const openUserFilterPrompt = () => {
@@ -54,10 +48,7 @@ export function CommitToolbar(): JSX.Element {
       user: nextUserFilter.trim()
     };
     setFilters(nextFilters);
-    postMessageToHost({
-      type: "setFilters",
-      payload: nextFilters
-    });
+    webviewCommands.setFilters(nextFilters);
   };
 
   return (
@@ -95,25 +86,17 @@ export function CommitToolbar(): JSX.Element {
         <CommitToolButton
           label="Refresh"
           iconClassName="codicon codicon-refresh"
-          onClick={() => postMessageToHost({ type: "refresh" })}
+          onClick={webviewCommands.refresh}
         />
         <CommitToolButton
           label="Cherry-pick"
           iconClassName="codicon codicon-git-commit"
-          onClick={() =>
-            postMessageToHost({
-              type: "commits:cherryPick"
-            })
-          }
+          onClick={webviewCommands.cherryPickCommit}
         />
         <CommitToolButton
           label="Go to hash/branch/tag"
           iconClassName="codicon codicon-search"
-          onClick={() =>
-            postMessageToHost({
-              type: "commits:goToRef"
-            })
-          }
+          onClick={webviewCommands.goToRef}
         />
       </div>
     </div>

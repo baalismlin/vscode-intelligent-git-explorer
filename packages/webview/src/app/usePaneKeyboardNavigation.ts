@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { getVisibleFiles, getVisibleRefs } from "./navigation";
-import { postMessageToHost } from "@bridge/vscode";
+import { webviewCommands } from "@bridge/webviewCommands";
 import { type FocusedPane, useGitLogStore } from "@store/gitLogStore";
 
 export function usePaneKeyboardNavigation(): void {
@@ -52,7 +52,7 @@ function handleRefNavigation(key: string): boolean {
   if (key === "ArrowDown" || key === "ArrowUp") {
     const nextItem = moveVisibleSelection(visibleRefs, currentIndex, key === "ArrowDown" ? 1 : -1);
     if (nextItem?.selectable) {
-      postMessageToHost({ type: "selectRef", payload: { refId: nextItem.id } });
+      webviewCommands.selectRef(nextItem.id);
     }
     return Boolean(nextItem);
   }
@@ -72,7 +72,7 @@ function handleRefNavigation(key: string): boolean {
   }
 
   if (key === "Enter" && currentItem.selectable) {
-    postMessageToHost({ type: "selectRef", payload: { refId: currentItem.id } });
+    webviewCommands.selectRef(currentItem.id);
     return true;
   }
 
@@ -102,12 +102,7 @@ function handleCommitNavigation(key: string): boolean {
     return false;
   }
 
-  postMessageToHost({
-    type: "selectCommit",
-    payload: {
-      commitId: nextCommitId
-    }
-  });
+  webviewCommands.selectCommit(nextCommitId);
   return true;
 }
 
@@ -148,10 +143,7 @@ function handleFileNavigation(key: string): boolean {
   }
 
   if (key === "Enter" && currentItem.selectable) {
-    postMessageToHost({
-      type: "openDiff",
-      payload: { path: currentItem.path }
-    });
+    webviewCommands.openDiff(currentItem.path);
     return true;
   }
 

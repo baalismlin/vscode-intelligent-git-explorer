@@ -1,5 +1,5 @@
 import { type ChangedFileNodeViewModel } from "@intelligent-git-log/contracts/gitLogViewModels";
-import { postMessageToHost } from "@bridge/vscode";
+import { webviewCommands } from "@bridge/webviewCommands";
 import { useGitLogStore } from "@store/gitLogStore";
 import { ChangedFilesTree } from "./ChangedFilesTree";
 import { CommitDetailsCard } from "./CommitDetailsCard";
@@ -24,10 +24,7 @@ export function ChangedFilesPanel(): JSX.Element {
             disabled={!canUseSelectedFile}
             onClick={() => {
               if (selectedFile) {
-                postMessageToHost({
-                  type: "openDiff",
-                  payload: { path: selectedFile.path }
-                });
+                webviewCommands.openDiff(selectedFile.path);
               }
             }}
           />
@@ -37,10 +34,7 @@ export function ChangedFilesPanel(): JSX.Element {
             disabled={!canUseSelectedFile}
             onClick={() => {
               if (selectedFile) {
-                postMessageToHost({
-                  type: "revertSelectedChanges",
-                  payload: { path: selectedFile.path }
-                });
+                webviewCommands.revertSelectedChanges(selectedFile.path);
               }
             }}
           />
