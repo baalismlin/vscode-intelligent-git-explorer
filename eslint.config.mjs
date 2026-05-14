@@ -61,6 +61,14 @@ export default tseslint.config(
     }
   },
   {
+    files: ["packages/*/test/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
+  },
+  {
     files: ["packages/webview/src/**/*.{ts,tsx}", "packages/webview/vite.config.mts"],
     languageOptions: {
       globals: {

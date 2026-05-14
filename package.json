@@ -37,6 +37,7 @@
     "format:check": "prettier . --check",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "pnpm run build && node --test packages/contracts/test/*.test.mjs packages/extension/test/*.test.mjs",
     "watch": "pnpm --filter @intelligent-git-log/extension build --watch"
   },
   "dependencies": {

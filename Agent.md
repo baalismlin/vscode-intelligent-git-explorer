@@ -59,11 +59,13 @@ Last checked: 2026-05-14
   - Virtual scrolling for the changed files tree
   - `pnpm run lint` passes
   - `pnpm run build` passes for contracts, extension, and webview
+  - First Node test layer for contracts protocol schemas, mapper/service behavior, and bridge dispatch
+  - Expanded Node tests for protocol negatives, service filter/navigation, bridge router errors, queue stale handling, repository path safety, and Git action command/revert flows
 - Remaining:
-  - Unit tests
-  - Bridge contract tests
+  - Webview component and interaction tests
+  - More Git provider/parser tests
   - Core interaction tests
-  - Automated regression coverage for Git action flows
+  - Broader automated regression coverage for Git action edge cases
   - Performance safeguards beyond current virtualization
 
 ## Current Position
@@ -73,19 +75,18 @@ The project has completed the main body of the data integration stage and has st
 - real repository data flows are active end-to-end
 - core details actions for file open, diff, and revert are implemented
 - three command actions remain intentionally unresolved
-- lint and production build are currently clean
-- no project-owned tests are present yet
+- lint, production build, and Node tests are currently clean
+- project-owned tests cover contracts, service/mapper behavior, bridge dispatch/router behavior, queue stale handling, repository path safety, and Git action command/revert flows
 
 The most accurate current label is:
 
 - Data integration stage: main work completed, pending action-level closure
-- Performance and engineering stage: started through virtualization plus clean lint/build, but not test-covered
+- Performance and engineering stage: started through virtualization plus clean lint/build/test baseline
 
 ## High Priority Remaining Work
 
 - Decide whether `Delete`, `Compare`, and `Cherry-pick` should be implemented now or removed/disabled from the UI temporarily
-- Add first test layer around contracts, mapper/service behavior, and bridge action dispatch
-- Add regression coverage for open diff and revert selected changes
+- Add webview component/interaction tests around filtering, selection, keyboard navigation, and file tree behavior
 
 ## Compressed Context
 
@@ -124,11 +125,16 @@ The most accurate current label is:
 - Verification:
   - `pnpm run lint`
   - `pnpm run build`
+  - `pnpm run test`
 - Test status:
-  - no repository-owned test files or test scripts found
+  - contracts protocol schema tests added
+  - mapper/service behavior tests added
+  - bridge dispatch tests added
+  - bridge router and message queue tests added
+  - repository file resolver and Git action tests added
 - Recommended next stage focus:
-  - tests
-  - bridge contract coverage
+  - webview interaction coverage
+  - Git provider/parser coverage
   - engineering hardening
 
 ## Maintenance Rule
