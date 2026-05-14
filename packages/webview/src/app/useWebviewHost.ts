@@ -11,9 +11,11 @@ export function useWebviewHost(): void {
     }
 
     const unsubscribe = subscribeToHostMessages();
-    const unsubscribePersist = useGitLogStore.subscribe((state) => {
-      persistWebviewState(state.getPersistedUiState());
-    });
+    const unsubscribePersist = useGitLogStore.subscribe(
+      (state) => state.getPersistedUiState(),
+      (state) => persistWebviewState(state),
+      { equalityFn: arePersistedWebviewStatesEqual }
+    );
     postMessageToHost({ type: "ready" });
 
     return () => {
@@ -21,4 +23,23 @@ export function useWebviewHost(): void {
       unsubscribePersist();
     };
   }, []);
+}
+
+function arePersistedWebviewStatesEqual(
+  left: PersistedWebviewState,
+  right: PersistedWebviewState
+): boolean {
+  return (
+    left.selectedFileId === right.selectedFileId &&
+    left.focusedPane === right.focusedPane &&
+    left.fileStateCommitId === right.fileStateCommitId &&
+    left.panelLayout.refsWidth === right.panelLayout.refsWidth &&
+    left.panelLayout.detailsWidth === right.panelLayout.detailsWidth &&
+    areStringArraysEqual(left.expandedRefs, right.expandedRefs) &&
+    areStringArraysEqual(left.expandedFiles, right.expandedFiles)
+  );
+}
+
+function areStringArraysEqual(left: string[], right: string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }

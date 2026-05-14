@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 import { createDataSlice } from "./slices/dataSlice";
 import { createFilterSlice } from "./slices/filterSlice";
 import { createStatusSlice } from "./slices/statusSlice";
@@ -11,9 +12,11 @@ import {
 
 export type { FocusedPane, PersistedWebviewState };
 
-export const useGitLogStore = create<GitLogStoreState>()((...storeApi) => ({
-  ...createDataSlice(...storeApi),
-  ...createFilterSlice(...storeApi),
-  ...createStatusSlice(...storeApi),
-  ...createUiSlice(...storeApi)
-}));
+export const useGitLogStore = create<GitLogStoreState>()(
+  subscribeWithSelector((...storeApi) => ({
+    ...createDataSlice(...storeApi),
+    ...createFilterSlice(...storeApi),
+    ...createStatusSlice(...storeApi),
+    ...createUiSlice(...storeApi)
+  }))
+);
