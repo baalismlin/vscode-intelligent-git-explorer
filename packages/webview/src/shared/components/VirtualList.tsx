@@ -6,7 +6,7 @@ export function VirtualList<T>({
   overscan = 8,
   className,
   contentClassName,
-  windowClassName = "virtual-list-window",
+  windowClassName = "virtual-list__window",
   emptyState,
   getKey,
   renderItem

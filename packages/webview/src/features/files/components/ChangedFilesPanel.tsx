@@ -71,7 +71,7 @@ export function ChangedFilesPanel(): JSX.Element {
           items={visibleFiles}
           rowHeight={fileRowHeight}
           className="file-tree"
-          contentClassName="virtual-list-content"
+          contentClassName="virtual-list__content"
           emptyState={<div className="empty-state">Select a commit to inspect changed files.</div>}
           getKey={(item) => item.node.id}
           renderItem={(item) => <ChangedFilesTree node={item.node} depth={item.depth} />}

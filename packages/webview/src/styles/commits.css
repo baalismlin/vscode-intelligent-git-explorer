@@ -1,0 +1,260 @@
+.commit-panel {
+  background: #ffffff;
+}
+
+.commit-panel .panel-body {
+  background: #ffffff;
+}
+
+.commit-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+
+.commit-toolbar-left,
+.commit-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.commit-toolbar-left {
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.commit-toolbar-right {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.commit-search {
+  width: 250px;
+  min-width: 250px;
+  max-width: 250px;
+  height: 26px;
+  flex: 0 0 250px;
+  border: 0;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+}
+
+.commit-search::placeholder {
+  color: var(--muted);
+}
+
+.commit-filter {
+  width: auto;
+  min-width: 0;
+  height: 26px;
+  border: 0;
+  outline: none;
+  padding: 0 18px 0 0;
+  background: transparent;
+  color: var(--text);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.commit-filter-button {
+  min-width: 0;
+  max-width: 180px;
+  height: 26px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commit-filter.is-placeholder {
+  color: var(--muted);
+}
+
+.commit-filter-button.is-placeholder {
+  color: var(--muted);
+}
+
+.commit-filter-popover-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.commit-filter-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 26px 26px 26px;
+  gap: 4px;
+  align-items: center;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(31, 35, 40, 0.12);
+}
+
+.toolbar .commit-user-filter-input {
+  width: 100%;
+  height: 26px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  padding: 0 7px;
+  background: #ffffff;
+}
+
+.commit-filter-popover-button {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 4px;
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.commit-filter-popover-button:hover {
+  background: #f4f5f7;
+  color: var(--text);
+}
+
+.commit-tool-button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.commit-tool-button:hover {
+  background: #f4f5f7;
+  color: var(--text);
+}
+
+.commit-header,
+.commit-row {
+  display: grid;
+  grid-template-columns: 76px minmax(240px, 1fr) 120px 112px;
+  align-items: center;
+}
+
+.commit-table-shell {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.commit-header {
+  min-height: 26px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--border);
+  background: #fafbfd;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.commit-list-scroll {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.commit-list-scroll.is-busy {
+  overflow: hidden;
+}
+
+.commit-list {
+  position: relative;
+  padding-top: 0;
+}
+
+.commit-row {
+  height: 25px;
+  border-bottom: 1px solid #f1f3f7;
+}
+
+.commit-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.graph-cell {
+  position: relative;
+  height: 24px;
+}
+
+.graph-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: 999px;
+  opacity: 0.75;
+}
+
+.graph-line.diagonal-left,
+.graph-line.diagonal-right {
+  width: 18px;
+  height: 2px;
+  top: 11px;
+  bottom: auto;
+  transform-origin: center;
+}
+
+.graph-line.diagonal-left {
+  transform: rotate(-28deg);
+}
+
+.graph-line.diagonal-right {
+  transform: rotate(28deg);
+}
+
+.graph-dot {
+  position: absolute;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.commit-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.commit-hash {
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+}
+
+.secondary {
+  color: var(--muted);
+}

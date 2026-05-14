@@ -25,8 +25,8 @@ export function CommitTable(): JSX.Element {
         rowHeight={rowHeight}
         overscan={overscan}
         className={`commit-list-scroll ${isLoading ? "is-busy" : ""}`.trim()}
-        contentClassName="commit-list virtual-list-content"
-        windowClassName="virtual-list-window"
+        contentClassName="commit-list virtual-list__content"
+        windowClassName="virtual-list__window"
         emptyState={<div className="empty-state">No commits for the selected reference.</div>}
         getKey={(commit) => commit.id}
         renderItem={(commit) => (

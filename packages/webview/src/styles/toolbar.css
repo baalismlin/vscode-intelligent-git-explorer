@@ -1,0 +1,27 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--toolbar-bg);
+}
+
+.toolbar input,
+.toolbar select {
+  height: 24px;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text);
+  border-radius: 3px;
+  padding: 0 7px;
+  min-width: 0;
+}
+
+.toolbar input {
+  flex: 1;
+}
+
+.toolbar select {
+  width: 92px;
+}

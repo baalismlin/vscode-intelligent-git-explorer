@@ -154,7 +154,7 @@ export function RefTreePanel(): JSX.Element {
           items={visibleRefRows}
           rowHeight={refRowHeight}
           className="reference-tree-pane"
-          contentClassName="reference-tree-content tree virtual-list-content"
+          contentClassName="reference-tree-content tree virtual-list__content"
           emptyState={
             <div className="reference-empty-state">No references match the current filter.</div>
           }

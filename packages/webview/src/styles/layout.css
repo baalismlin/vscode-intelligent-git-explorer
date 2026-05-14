@@ -1,0 +1,97 @@
+.layout-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-banner {
+  padding: 6px 10px;
+  color: #842029;
+  background: #f8d7da;
+  border-bottom: 1px solid #f1aeb5;
+}
+
+.layout {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+}
+
+.pane-shell {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.focused-pane .panel-title {
+  color: #315f93;
+  background: linear-gradient(to bottom, #f9fcff, #edf5ff);
+}
+
+.panel {
+  min-width: 0;
+  height: 100%;
+  background: var(--panel-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel:last-child {
+  border-right: 0;
+}
+
+.resize-handle {
+  position: relative;
+  cursor: col-resize;
+  background: rgba(216, 221, 230, 0.9);
+  touch-action: none;
+  user-select: none;
+  min-width: 1px;
+}
+
+.resize-handle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: rgba(198, 204, 215, 0.9);
+}
+
+.resize-handle:hover::before,
+.focused-pane + .resize-handle::before,
+.resize-handle:hover {
+  background-color: rgba(98, 152, 219, 0.15);
+}
+
+.panel-title {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(to bottom, #fafbfd, #f4f6fa);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.panel-body {
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tree,
+.commit-list,
+.file-tree {
+  padding: 4px 0;
+}
+
+.tree,
+.file-tree {
+  padding: 2px 0;
+}

@@ -1,0 +1,47 @@
+:root {
+  color-scheme: light;
+  --bg: #f7f8fa;
+  --panel-bg: #ffffff;
+  --reference-bg: #ffffff;
+  --reference-toolbar-bg: #ffffff;
+  --reference-search-bg: #ffffff;
+  --border: rgb(235, 236, 240);
+  --border-strong: rgb(235, 236, 240);
+  --text: #22262e;
+  --muted: #6f7783;
+  --selected: rgb(223, 225, 229);
+  --selected-strong: #c4e2ff;
+  --hover: #f3f7fc;
+  --toolbar-bg: #f5f7fb;
+  --status-modified: #d9822b;
+  --status-added: #2d9d4d;
+  --status-deleted: #c73636;
+  --status-renamed: #7a4dd8;
+  --font: "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12px;
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
