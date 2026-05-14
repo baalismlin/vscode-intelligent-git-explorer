@@ -2,6 +2,8 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import { outputLogger } from "#extension/logging/outputLogger";
 import { resolveRepositoryFileUri } from "#extension/utils/repositoryFileResolver";
+import { vscodeCommands } from "#extension/vscode/vscodeCommands";
+import { vscodeWindow } from "#extension/vscode/vscodeWindow";
 
 interface GitExtension {
   getAPI(version: 1): GitApi;
@@ -25,7 +27,7 @@ export class VscodeGitActions {
   public async openFile(repositoryRoot: string, filePath: string): Promise<void> {
     const fileUri = resolveRepositoryFileUri(repositoryRoot, filePath);
     outputLogger.info(`Opening file: ${fileUri.fsPath}`);
-    await vscode.commands.executeCommand("vscode.open", fileUri);
+    await vscodeCommands.openFile(fileUri);
   }
 
   public async openDiff(
@@ -48,7 +50,7 @@ export class VscodeGitActions {
     const title = `${path.basename(filePath)} (${previousShortHash} - ${selectedCommitId.slice(0, 7)})`;
 
     outputLogger.info(`Opening diff for ${filePath} at commit ${selectedCommitId}`);
-    await vscode.commands.executeCommand("vscode.diff", previousUri, selectedUri, title);
+    await vscodeCommands.openDiff(previousUri, selectedUri, title);
   }
 
   public async revertSelectedChanges(
@@ -60,7 +62,7 @@ export class VscodeGitActions {
       throw new Error("No commit is selected.");
     }
 
-    const confirmation = await vscode.window.showWarningMessage(
+    const confirmation = await vscodeWindow.showWarningMessage(
       `Revert selected changes in ${filePath}? This will modify your working tree.`,
       { modal: true },
       "Revert"
@@ -88,15 +90,15 @@ export class VscodeGitActions {
   }
 
   public async createBranch(): Promise<void> {
-    await vscode.commands.executeCommand("git.branch");
+    await vscodeCommands.createBranch();
   }
 
   public async fetch(): Promise<void> {
-    await vscode.commands.executeCommand("git.fetch");
+    await vscodeCommands.fetch();
   }
 
   public async promptForRefQuery(): Promise<string | undefined> {
-    return vscode.window.showInputBox({
+    return vscodeWindow.showInputBox({
       title: "Go to hash/branch/tag",
       prompt: "Enter a branch, tag, ref, or commit text to filter the log.",
       placeHolder: "main, origin/main, v1.0.0, a1b2c3d",

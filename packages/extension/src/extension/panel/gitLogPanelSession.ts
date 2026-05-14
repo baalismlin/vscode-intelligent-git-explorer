@@ -2,6 +2,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import { WebviewMessageRouter } from "#extension/bridge/webviewMessageRouter";
 import { outputLogger } from "#extension/logging/outputLogger";
+import { vscodeWindow } from "#extension/vscode/vscodeWindow";
 import { type GitLogServiceFactory } from "./gitLogServiceFactory";
 import { type WebviewHtmlRenderer } from "./webviewHtmlRenderer";
 
@@ -139,7 +140,7 @@ export class GitLogPanelSession {
     } catch (error) {
       const message = `Missing webview resource: ${resource.fsPath}`;
       outputLogger.error(message);
-      void vscode.window.showErrorMessage(message);
+      void vscodeWindow.showErrorMessage(message);
       throw error;
     }
   }

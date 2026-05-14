@@ -1,6 +1,6 @@
-import * as vscode from "vscode";
+import { vscodeWindow } from "#extension/vscode/vscodeWindow";
 
-const channel = vscode.window.createOutputChannel("Intelligent Git Log");
+const channel = vscodeWindow.createOutputChannel("Intelligent Git Log");
 
 function write(level: "INFO" | "WARN" | "ERROR", message: string): void {
   channel.appendLine(`[${level}] ${new Date().toISOString()} ${message}`);

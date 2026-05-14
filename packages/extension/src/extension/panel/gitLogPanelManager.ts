@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { outputLogger } from "#extension/logging/outputLogger";
+import { vscodeWindow } from "#extension/vscode/vscodeWindow";
 import { GitLogPanelSession } from "./gitLogPanelSession";
 import { GitLogServiceFactory } from "./gitLogServiceFactory";
 import { WebviewHtmlRenderer } from "./webviewHtmlRenderer";
@@ -19,7 +20,7 @@ export class GitLogPanelManager implements vscode.Disposable {
     }
 
     outputLogger.info("Creating new Git Log panel.");
-    const panel = vscode.window.createWebviewPanel(viewType, "Intelligent Git Log", column, {
+    const panel = vscodeWindow.createWebviewPanel(viewType, "Intelligent Git Log", column, {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [
