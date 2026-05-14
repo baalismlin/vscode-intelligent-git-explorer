@@ -4,7 +4,12 @@ import {
   type GitCommitSummary
 } from "@intelligent-git-log/contracts/gitLogModels";
 import { ChangedFilesTreeBuilder } from "./changedFilesTreeBuilder";
-import { fieldSeparator, recordSeparator, splitLines } from "./gitProtocol";
+import {
+  fieldSeparator,
+  recordSeparator,
+  splitLines,
+  splitSpaceSeparatedRefs
+} from "./gitProtocol";
 
 export class GitCommitParser {
   private readonly changedFilesTreeBuilder: ChangedFilesTreeBuilder;
@@ -23,10 +28,12 @@ export class GitCommitParser {
       .map((record) => record.trim())
       .filter(Boolean)
       .map((record) => {
-        const [id, shortHash, author, date, ...messageParts] = record.split(fieldSeparator);
+        const [id, shortHash, parentIdsValue, author, date, ...messageParts] =
+          record.split(fieldSeparator);
         return {
           id,
           shortHash,
+          parentIds: splitSpaceSeparatedRefs(parentIdsValue),
           author,
           date,
           message: messageParts.join(fieldSeparator),
@@ -54,7 +61,7 @@ export class GitCommitParser {
       return null;
     }
 
-    const [resolvedCommitId, shortHash, author, date, ...messageParts] =
+    const [resolvedCommitId, shortHash, _parentIdsValue, author, date, ...messageParts] =
       headerLine.split(fieldSeparator);
     const changedFiles = this.changedFilesTreeBuilder.build(splitLines(filesOutput));
 

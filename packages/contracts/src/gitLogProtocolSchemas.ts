@@ -31,9 +31,28 @@ export const gitRefNodeSchema: z.ZodType<GitRefNode> = z.lazy(() =>
 );
 
 export const commitGraphSchema: z.ZodType<CommitGraphViewModel> = z.object({
-  color: z.string(),
-  lane: z.number(),
-  shape: z.enum(["straight", "mergeLeft", "mergeRight"])
+  width: z.number(),
+  lanes: z.array(
+    z.object({
+      lane: z.number(),
+      color: z.string(),
+      top: z.boolean(),
+      bottom: z.boolean()
+    })
+  ),
+  edges: z.array(
+    z.object({
+      fromLane: z.number(),
+      toLane: z.number(),
+      from: z.enum(["node", "lane"]),
+      to: z.enum(["top", "bottom"]),
+      color: z.string()
+    })
+  ),
+  node: z.object({
+    lane: z.number(),
+    color: z.string()
+  })
 });
 
 export const commitItemSchema: z.ZodType<CommitListItemViewModel> = z.object({

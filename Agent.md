@@ -111,6 +111,7 @@ The most accurate current label is:
   - commit list virtual scrolling
   - changed files virtual scrolling
   - details toolbar actions
+  - parent-aware SVG commit graph rendering
 - Implemented extension actions:
   - open file
   - open diff
@@ -129,6 +130,7 @@ The most accurate current label is:
 - Test status:
   - contracts protocol schema tests added
   - mapper/service behavior tests added
+  - commit graph layout tests added
   - bridge dispatch tests added
   - bridge router and message queue tests added
   - repository file resolver and Git action tests added

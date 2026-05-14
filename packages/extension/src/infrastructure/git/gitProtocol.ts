@@ -7,3 +7,10 @@ export function splitLines(value: string): string[] {
     .map((line) => line.trimEnd())
     .filter(Boolean);
 }
+
+export function splitSpaceSeparatedRefs(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(" ")
+    .map((ref) => ref.trim())
+    .filter(Boolean);
+}

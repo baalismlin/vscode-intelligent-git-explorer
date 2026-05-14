@@ -155,7 +155,7 @@
 .commit-header,
 .commit-row {
   display: grid;
-  grid-template-columns: 76px minmax(240px, 1fr) 120px 112px;
+  grid-template-columns: 96px minmax(240px, 1fr) 120px 112px;
   align-items: center;
 }
 
@@ -204,43 +204,27 @@
 
 .graph-cell {
   position: relative;
-  height: 24px;
+  height: 25px;
 }
 
-.graph-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  border-radius: 999px;
-  opacity: 0.75;
+.commit-graph {
+  display: block;
+  height: 25px;
+  overflow: visible;
 }
 
-.graph-line.diagonal-left,
-.graph-line.diagonal-right {
-  width: 18px;
-  height: 2px;
-  top: 11px;
-  bottom: auto;
-  transform-origin: center;
+.commit-graph-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.82;
 }
 
-.graph-line.diagonal-left {
-  transform: rotate(-28deg);
-}
-
-.graph-line.diagonal-right {
-  transform: rotate(28deg);
-}
-
-.graph-dot {
-  position: absolute;
-  top: 8px;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+.commit-graph-node {
+  stroke: #ffffff;
+  stroke-width: 2;
+  paint-order: stroke;
 }
 
 .commit-message {

@@ -26,6 +26,7 @@ const commitsByRef = {
       message: "First",
       author: "Ada",
       date: "2026-05-14",
+      parentIds: [],
       branchId: "main"
     }
   ],
@@ -36,6 +37,7 @@ const commitsByRef = {
       message: "Feature",
       author: "Ada",
       date: "2026-05-14",
+      parentIds: ["commit-1"],
       branchId: "feature/test"
     }
   ]
@@ -127,8 +129,228 @@ test("service selects refs and maps selected commit details", async () => {
     selectedRefId: "feature/test",
     selectedCommitId: "commit-2"
   });
-  assert.equal(result.commits[0].graph.shape, "mergeRight");
+  assert.deepEqual(result.commits[0].graph.node, {
+    lane: 0,
+    color: "#2f80ed"
+  });
+  assert.equal(result.commits[0].graph.width, 64);
   assert.equal(result.selectedCommitDetail.commitId, "commit-2");
+});
+
+test("mapper builds graph lanes and merge edges from commit parents", () => {
+  const mapper = new GitLogViewModelMapper();
+  const commits = mapper.mapCommitListItems([
+    {
+      id: "merge",
+      shortHash: "m",
+      message: "Merge",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-parent", "feature-parent"],
+      branchId: "main"
+    },
+    {
+      id: "main-parent",
+      shortHash: "mp",
+      message: "Main parent",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: [],
+      branchId: "main"
+    },
+    {
+      id: "feature-parent",
+      shortHash: "fp",
+      message: "Feature parent",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: [],
+      branchId: "feature/test"
+    }
+  ]);
+
+  assert.equal(commits[0].graph.node.lane, 0);
+  assert.deepEqual(commits[0].graph.edges, [
+    {
+      fromLane: 0,
+      toLane: 1,
+      from: "node",
+      to: "bottom",
+      color: "#f2994a"
+    }
+  ]);
+  assert.equal(commits[0].graph.lanes[1].top, false);
+  assert.equal(commits[0].graph.lanes[1].bottom, false);
+  assert.deepEqual(
+    commits[0].graph.lanes.map((lane) => lane.lane),
+    [0, 1]
+  );
+  assert.equal(commits[2].graph.node.lane, 1);
+});
+
+test("mapper uses an edge instead of a node-lane tail when the parent is already active", () => {
+  const mapper = new GitLogViewModelMapper();
+  const commits = mapper.mapCommitListItems([
+    {
+      id: "merge",
+      shortHash: "m",
+      message: "Merge",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-parent", "feature-parent"],
+      branchId: "main"
+    },
+    {
+      id: "feature-parent",
+      shortHash: "fp",
+      message: "Feature parent",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-parent"],
+      branchId: "feature/test"
+    },
+    {
+      id: "main-parent",
+      shortHash: "mp",
+      message: "Main parent",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: [],
+      branchId: "main"
+    }
+  ]);
+
+  assert.equal(commits[1].graph.node.lane, 1);
+  assert.equal(commits[1].graph.lanes[1].bottom, false);
+  assert.deepEqual(commits[1].graph.edges, [
+    {
+      fromLane: 1,
+      toLane: 0,
+      from: "node",
+      to: "bottom",
+      color: "#2f80ed"
+    }
+  ]);
+});
+
+test("mapper preserves branch lanes when another branch ends into an active parent", () => {
+  const mapper = new GitLogViewModelMapper();
+  const commits = mapper.mapCommitListItems([
+    {
+      id: "merge",
+      shortHash: "m",
+      message: "Merge B into A",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["branch-a", "branch-b"],
+      branchId: "main"
+    },
+    {
+      id: "branch-a",
+      shortHash: "a",
+      message: "A branch commit",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["branch-b"],
+      branchId: "main"
+    },
+    {
+      id: "branch-b",
+      shortHash: "b",
+      message: "B branch commit",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: [],
+      branchId: "feature"
+    }
+  ]);
+
+  assert.equal(commits[0].graph.node.lane, 0);
+  assert.equal(commits[1].graph.node.lane, 0);
+  assert.equal(commits[2].graph.node.lane, 0);
+});
+
+test("mapper keeps first-parent commits on the main lane when side branch appears first", () => {
+  const mapper = new GitLogViewModelMapper();
+  const commits = mapper.mapCommitListItems([
+    {
+      id: "merge",
+      shortHash: "m",
+      message: "Merge A into main",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-5", "branch-a-1"],
+      branchId: "main"
+    },
+    {
+      id: "branch-a-1",
+      shortHash: "a1",
+      message: "A branch commit",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-3"],
+      branchId: "branch-a"
+    },
+    {
+      id: "main-5",
+      shortHash: "m5",
+      message: "Main commit 5",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-4"],
+      branchId: "main"
+    },
+    {
+      id: "main-4",
+      shortHash: "m4",
+      message: "Main commit 4",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-3"],
+      branchId: "main"
+    },
+    {
+      id: "main-3",
+      shortHash: "m3",
+      message: "Main commit 3",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-2"],
+      branchId: "main"
+    },
+    {
+      id: "main-2",
+      shortHash: "m2",
+      message: "Main commit 2",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: ["main-1"],
+      branchId: "main"
+    },
+    {
+      id: "main-1",
+      shortHash: "m1",
+      message: "Main commit 1",
+      author: "Ada",
+      date: "2026-05-14",
+      parentIds: [],
+      branchId: "main"
+    }
+  ]);
+
+  assert.equal(commits[1].graph.node.lane, 1);
+  assert.equal(commits[1].graph.lanes[1].bottom, true);
+  assert.deepEqual(commits[1].graph.edges, []);
+  assert.equal(commits[4].graph.node.lane, 0);
+  assert.deepEqual(commits[4].graph.edges, [
+    {
+      fromLane: 0,
+      toLane: 1,
+      from: "node",
+      to: "top",
+      color: "#2f80ed"
+    }
+  ]);
 });
 
 test("service applies filters and preserves them in persisted state", async () => {

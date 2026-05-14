@@ -51,7 +51,7 @@ export class RealGitLogProvider implements GitLogProvider {
       "log",
       targetRef,
       "--date=format-local:%Y-%m-%d %H:%M",
-      `--pretty=format:%H${fieldSeparator}%h${fieldSeparator}%an${fieldSeparator}%ad${fieldSeparator}%s${recordSeparator}`
+      `--pretty=format:%H${fieldSeparator}%h${fieldSeparator}%P${fieldSeparator}%an${fieldSeparator}%ad${fieldSeparator}%s${recordSeparator}`
     ];
 
     if (filters.user.trim()) {
@@ -85,7 +85,7 @@ export class RealGitLogProvider implements GitLogProvider {
       "-s",
       commitId,
       "--date=format-local:%Y-%m-%d %H:%M",
-      `--format=%H${fieldSeparator}%h${fieldSeparator}%an${fieldSeparator}%ad${fieldSeparator}%s`
+      `--format=%H${fieldSeparator}%h${fieldSeparator}%P${fieldSeparator}%an${fieldSeparator}%ad${fieldSeparator}%s`
     ]);
     const filesOutput = await this.runner.run([
       "diff-tree",

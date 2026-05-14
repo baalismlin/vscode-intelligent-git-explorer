@@ -1,7 +1,6 @@
 import {
   type ChangedFileNodeViewModel,
   type CommitDetailViewModel,
-  type CommitGraphViewModel,
   type CommitListItemViewModel
 } from "@intelligent-git-log/contracts/gitLogViewModels";
 import {
@@ -10,22 +9,37 @@ import {
   type GitCommitSummary,
   type GitRefNode
 } from "@intelligent-git-log/contracts/gitLogModels";
-
-const graphPalette = ["#2f80ed", "#f2994a", "#27ae60", "#9b51e0", "#eb5757", "#56ccf2", "#f2c94c"];
+import { CommitGraphLayoutBuilder } from "./commitGraphLayoutBuilder";
 
 export class GitLogViewModelMapper {
+  private readonly graphLayoutBuilder: CommitGraphLayoutBuilder;
+
+  public constructor(graphLayoutBuilder = new CommitGraphLayoutBuilder()) {
+    this.graphLayoutBuilder = graphLayoutBuilder;
+  }
+
   public mapRefs(refs: GitRefNode[]): GitRefNode[] {
     return refs;
   }
 
   public mapCommitListItems(commits: GitCommitSummary[]): CommitListItemViewModel[] {
-    return commits.map((commit, index) => ({
+    const graphs = this.graphLayoutBuilder.build(commits);
+
+    return commits.map((commit) => ({
       id: commit.id,
       shortHash: commit.shortHash,
       message: commit.message,
       author: commit.author,
       date: commit.date,
-      graph: this.mapCommitGraph(commit, index)
+      graph: graphs.get(commit.id) ?? {
+        width: 64,
+        lanes: [],
+        edges: [],
+        node: {
+          lane: 0,
+          color: "#2f80ed"
+        }
+      }
     }));
   }
 
@@ -50,33 +64,6 @@ export class GitLogViewModelMapper {
       changedFiles,
       defaultExpandedFileIds,
       initialSelectedFileId
-    };
-  }
-
-  private mapCommitGraph(commit: GitCommitSummary, index: number): CommitGraphViewModel {
-    const lane = index % 2;
-    const color = graphPalette[index % graphPalette.length];
-
-    if (commit.branchId.includes("feature")) {
-      return {
-        color,
-        lane: 1,
-        shape: "mergeRight"
-      };
-    }
-
-    if (index % 3 === 1) {
-      return {
-        color,
-        lane,
-        shape: "mergeLeft"
-      };
-    }
-
-    return {
-      color,
-      lane,
-      shape: "straight"
     };
   }
 

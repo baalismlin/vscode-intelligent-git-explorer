@@ -21,6 +21,7 @@ export interface GitChangedFileNode {
 export interface GitCommitSummary {
   id: string;
   shortHash: string;
+  parentIds: string[];
   message: string;
   author: string;
   date: string;

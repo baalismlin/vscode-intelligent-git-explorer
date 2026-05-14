@@ -17,7 +17,12 @@ const commitItem = {
   message: "Initial commit",
   author: "Ada",
   date: "2026-05-14",
-  graph: { color: "#2f80ed", lane: 0, shape: "straight" }
+  graph: {
+    width: 64,
+    lanes: [{ lane: 0, color: "#2f80ed", top: false, bottom: true }],
+    edges: [],
+    node: { lane: 0, color: "#2f80ed" }
+  }
 };
 
 const commitDetail = {

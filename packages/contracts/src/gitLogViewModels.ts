@@ -7,9 +7,30 @@ import {
 } from "./gitLogModels";
 
 export interface CommitGraphViewModel {
-  color: string;
+  width: number;
+  lanes: CommitGraphLaneViewModel[];
+  edges: CommitGraphEdgeViewModel[];
+  node: CommitGraphNodeViewModel;
+}
+
+export interface CommitGraphLaneViewModel {
   lane: number;
-  shape: "straight" | "mergeLeft" | "mergeRight";
+  color: string;
+  top: boolean;
+  bottom: boolean;
+}
+
+export interface CommitGraphEdgeViewModel {
+  fromLane: number;
+  toLane: number;
+  from: "node" | "lane";
+  to: "top" | "bottom";
+  color: string;
+}
+
+export interface CommitGraphNodeViewModel {
+  lane: number;
+  color: string;
 }
 
 export interface CommitListItemViewModel {
