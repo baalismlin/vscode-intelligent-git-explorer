@@ -178,6 +178,14 @@ function resolveLayout({
   }
 
   const separatorWidth = 2;
+  const minimumRequiredWidth = minRefsWidth + minCenterWidth + minDetailsWidth + separatorWidth;
+  if (availableWidth < minimumRequiredWidth) {
+    return {
+      refsWidth: Math.max(refsWidth, minRefsWidth),
+      detailsWidth: Math.max(detailsWidth, minDetailsWidth)
+    };
+  }
+
   const maxRefsWidth = availableWidth - minCenterWidth - minDetailsWidth - separatorWidth;
   const safeRefsWidth = clamp(refsWidth, minRefsWidth, maxRefsWidth);
   const maxDetailsWidth = availableWidth - minCenterWidth - safeRefsWidth - separatorWidth;

@@ -19,15 +19,7 @@ export const createUiSlice: StateCreator<GitLogStoreState, [], [], UiSlice> = (s
   selectedFileId: "",
   panelLayout: defaultPanelLayout,
   focusedPane: "commits",
-  restorePersistedUiState: (state) =>
-    set({
-      persistedUiState: state,
-      expandedRefs: state.expandedRefs,
-      expandedFiles: state.expandedFiles,
-      selectedFileId: state.selectedFileId,
-      panelLayout: state.panelLayout,
-      focusedPane: state.focusedPane
-    }),
+  restorePersistedUiState: (state) => set({ persistedUiState: state }),
   toggleRefExpanded: (refId) =>
     set((state) => ({
       expandedRefs: toggleInArray(state.expandedRefs, refId)
@@ -53,8 +45,7 @@ export const createUiSlice: StateCreator<GitLogStoreState, [], [], UiSlice> = (s
     selectedFileId: get().selectedFileId,
     panelLayout: get().panelLayout,
     focusedPane: get().focusedPane,
-    fileStateCommitId:
-      get().selectedCommitDetail?.commitId ?? get().persistedUiState?.fileStateCommitId ?? ""
+    fileStateCommitId: get().selectedCommitDetail?.commitId ?? ""
   })
 });
 
